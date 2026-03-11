@@ -29,7 +29,8 @@
             -webkit-backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 0 20px;
             z-index: 100;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -38,6 +39,31 @@
             font-size: 17px;
             font-weight: 600;
             letter-spacing: -0.01em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 6px 14px;
+            background: #007aff;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: #0051d5;
+        }
+
+        .header-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
         }
 
         .sidebar {
@@ -104,6 +130,24 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .select-all-btn {
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .select-all-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .grid {
@@ -120,6 +164,7 @@
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             aspect-ratio: 21/9;
+            border: 2px solid transparent;
         }
 
         .image-card:hover {
@@ -127,11 +172,51 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
+        .image-card.selected {
+            border-color: #007aff;
+            box-shadow: 0 0 0 2px #007aff;
+        }
+
         .image-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+
+        .checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .image-card.selected .checkbox {
+            background: #007aff;
+            border-color: #007aff;
+        }
+
+        .checkbox::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .image-card.selected .checkbox::after {
+            opacity: 1;
         }
 
         .image-info {
@@ -156,24 +241,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .storage-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            margin-left: 6px;
-        }
-
-        .storage-github {
-            background: #238636;
-            color: #fff;
-        }
-
-        .storage-smms {
-            background: #007aff;
-            color: #fff;
         }
 
         .lightbox {
@@ -207,7 +274,7 @@
         .lightbox-title {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.8);
-            max-width: 50%;
+            max-width: 40%;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -302,6 +369,209 @@
             font-size: 14px;
         }
 
+        .selection-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            z-index: 150;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .selection-bar.active {
+            display: flex;
+        }
+
+        .selection-count {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .selection-btn {
+            padding: 8px 16px;
+            background: #007aff;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .selection-btn:hover {
+            background: #0051d5;
+        }
+
+        .selection-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .selection-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #1c1c1e;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .upload-select-btn {
+            width: 100%;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-select-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .upload-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .upload-preview-item {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .upload-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-preview-item span {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .upload-status {
+            margin-top: 12px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s ease;
+        }
+
+        .modal-btn.primary {
+            background: #007aff;
+            color: #fff;
+        }
+
+        .modal-btn.primary:hover {
+            background: #0051d5;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -328,7 +598,7 @@
             
             .main-content {
                 margin-left: 0;
-                margin-bottom: 60px;
+                margin-bottom: 100px;
                 padding: 72px 12px 30px;
             }
             
@@ -345,12 +615,55 @@
                 padding: 6px 12px;
                 font-size: 12px;
             }
+
+            .selection-bar {
+                left: 10px;
+                right: 10px;
+                transform: none;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Password Protection Layer -->
+    <div id="passwordLayer" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h2 style="font-size: 24px; margin-bottom: 30px; font-weight: 600;">Image Gallery</h2>
+        <div style="background: #1c1c1e; padding: 30px; border-radius: 12px; width: 300px;">
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6); font-size: 14px;">请输入密码</p>
+            <input type="password" id="passwordInput" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 16px; margin-bottom: 15px;" placeholder="密码">
+            <button onclick="checkPassword()" style="width: 100%; padding: 12px; background: #007aff; border: none; border-radius: 6px; color: #fff; font-size: 14px; cursor: pointer; font-weight: 500;">进入</button>
+            <p id="passwordError" style="color: #ff3b30; font-size: 13px; margin-top: 10px; display: none; text-align: center;">密码错误</p>
+        </div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === '5104') {
+                document.getElementById('passwordLayer').style.display = 'none';
+                sessionStorage.setItem('galleryAuth', 'true');
+                // Initialize gallery after password correct
+                setTimeout(initGallery, 100);
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+            }
+        }
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+        if (sessionStorage.getItem('galleryAuth') === 'true') {
+            document.getElementById('passwordLayer').style.display = 'none';
+        }
+    </script>
+
     <header>
         <h1>Image Gallery</h1>
+        <div class="header-actions">
+            <button class="header-btn" onclick="openUploadModal()">上传图片</button>
+            <button class="header-btn" id="batchDownloadBtn" onclick="batchDownload()" disabled>批量下载</button>
+        </div>
     </header>
 
     <div class="sidebar" id="sidebar"></div>
@@ -362,6 +675,7 @@
             <div class="lightbox-title" id="lightboxTitle">图片查看</div>
             <div class="lightbox-actions">
                 <a href="#" class="lightbox-btn primary" id="downloadBtn" download>下载原图</a>
+                <button class="lightbox-btn" onclick="toggleSelectCurrent()">选择</button>
                 <a href="/" class="lightbox-btn">返回画廊</a>
             </div>
         </div>
@@ -376,20 +690,73 @@
         </div>
     </div>
 
-    <script src="images.json"></script>
+    <div class="selection-bar" id="selectionBar">
+        <span class="selection-count" id="selectionCount">已选择 0 张</span>
+        <div class="selection-actions">
+            <button class="selection-btn" onclick="batchDownload()">下载选中</button>
+            <button class="selection-btn secondary" onclick="clearSelection()">取消</button>
+        </div>
+    </div>
+
     <script>
-        let currentDate = "";
+        const galleryData = {
+            "2026-03-11": [
+                {name: "puppy-test-2026-03-11.png", original: "2026-03-11/puppy-test-2026-03-11.png"},
+                {name: "car-ad-side-v2-04-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-04-2026-03-11.png"},
+                {name: "car-ad-side-v2-03-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-03-2026-03-11.png"},
+                {name: "car-ad-side-v2-02-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-02-2026-03-11.png"},
+                {name: "car-ad-side-v2-01-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-01-2026-03-11.png"},
+                {name: "car-ad-side-04-2026-03-11.png", original: "2026-03-11/car-ad-side-04-2026-03-11.png"},
+                {name: "car-ad-side-03-2026-03-11.png", original: "2026-03-11/car-ad-side-03-2026-03-11.png"},
+                {name: "car-ad-side-02-2026-03-11.png", original: "2026-03-11/car-ad-side-02-2026-03-11.png"},
+                {name: "car-ad-side-01-2026-03-11.png", original: "2026-03-11/car-ad-side-01-2026-03-11.png"},
+                {name: "car-ad-front-04-2026-03-11.png", original: "2026-03-11/car-ad-front-04-2026-03-11.png"},
+                {name: "car-ad-front-03-2026-03-11.png", original: "2026-03-11/car-ad-front-03-2026-03-11.png"},
+                {name: "car-ad-front-02-2026-03-11.png", original: "2026-03-11/car-ad-front-02-2026-03-11.png"},
+                {name: "car-ad-front-01-2026-03-11.png", original: "2026-03-11/car-ad-front-01-2026-03-11.png"},
+                {name: "car-ad-closeup-04-2026-03-11.png", original: "2026-03-11/car-ad-closeup-04-2026-03-11.png"},
+                {name: "car-ad-closeup-03-2026-03-11.png", original: "2026-03-11/car-ad-closeup-03-2026-03-11.png"},
+                {name: "car-ad-closeup-02-2026-03-11.png", original: "2026-03-11/car-ad-closeup-02-2026-03-11.png"},
+                {name: "car-ad-closeup-01-2026-03-11.png", original: "2026-03-11/car-ad-closeup-01-2026-03-11.png"},
+                {name: "car-ad-rooftop-04-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-04-2026-03-11.png"},
+                {name: "car-ad-rooftop-03-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-03-2026-03-11.png"},
+                {name: "car-ad-rooftop-02-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-02-2026-03-11.png"},
+                {name: "car-ad-rooftop-01-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-01-2026-03-11.png"},
+                {name: "car-ad-wide-04-2026-03-11.png", original: "2026-03-11/car-ad-wide-04-2026-03-11.png"},
+                {name: "car-ad-wide-03-2026-03-11.png", original: "2026-03-11/car-ad-wide-03-2026-03-11.png"},
+                {name: "car-ad-wide-02-2026-03-11.png", original: "2026-03-11/car-ad-wide-02-2026-03-11.png"},
+                {name: "car-ad-wide-01-2026-03-11.png", original: "2026-03-11/car-ad-wide-01-2026-03-11.png"},
+                {name: "car-ad-04-2026-03-11.png", original: "2026-03-11/car-ad-04-2026-03-11.png"},
+                {name: "car-ad-03-2026-03-11.png", original: "2026-03-11/car-ad-03-2026-03-11.png"},
+                {name: "car-ad-02-2026-03-11.png", original: "2026-03-11/car-ad-02-2026-03-11.png"},
+                {name: "car-ad-01-2026-03-11.png", original: "2026-03-11/car-ad-01-2026-03-11.png"}
+            ],
+            "2026-03-10": [
+                {name: "westie-puppy-2026-03-10.png", original: "2026-03-10/westie-puppy-2026-03-10.png"},
+                {name: "pink-porsche-911-2026-03-10.png", original: "2026-03-10/pink-porsche-911-2026-03-10.png"},
+                {name: "magic-carpet-2026-03-10.png", original: "2026-03-10/magic-carpet-2026-03-10.png"},
+                {name: "labrador-2026-03-10.png", original: "2026-03-10/labrador-2026-03-10.png"}
+            ],
+            "2026-03-09": [
+                {name: "labrador-loki-2026-03-09.png", original: "2026-03-09/labrador-loki-2026-03-09.png"},
+                {name: "cat-sunshine-2026-03-09.png", original: "2026-03-09/cat-sunshine-2026-03-09.png"}
+            ]
+        };
+
+        let currentDate = "2026-03-11";
         let currentIndex = 0;
         let currentImageList = [];
+        let selectedImages = new Set();
+
+        function getPreviewUrl(originalPath) {
+            return originalPath;
+        }
 
         function initGallery() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             
-            const dates = Object.keys(galleryData).sort().reverse();
-            currentDate = dates[0];
-            
-            dates.forEach(date => {
+            Object.keys(galleryData).sort().reverse().forEach(date => {
                 const item = document.createElement('div');
                 item.className = 'sidebar-item' + (date === currentDate ? ' active' : '');
                 item.innerHTML = `${date} <span class="count">${galleryData[date].length}</span>`;
@@ -402,7 +769,10 @@
                 
                 const header = document.createElement('div');
                 header.className = 'date-header';
-                header.textContent = date;
+                header.innerHTML = `
+                    <span>${date}</span>
+                    <button class="select-all-btn" onclick="selectAll('${date}')">全选</button>
+                `;
                 section.appendChild(header);
                 
                 const grid = document.createElement('div');
@@ -411,21 +781,103 @@
                 galleryData[date].forEach((img, index) => {
                     const card = document.createElement('div');
                     card.className = 'image-card';
-                    const storageBadge = img.storage === 'github' 
-                        ? '<span class="storage-badge storage-github">GitHub</span>' 
-                        : '<span class="storage-badge storage-smms">SMMS</span>';
+                    card.dataset.date = date;
+                    card.dataset.index = index;
+                    card.dataset.original = img.original;
                     card.innerHTML = `
-                        <img src="${img.thumb || img.url}" alt="${img.name}" loading="lazy">
+                        <div class="checkbox"></div>
+                        <img src="${getPreviewUrl(img.original)}" alt="${img.name}" loading="lazy">
                         <div class="image-info">
-                            <div class="image-name">${img.name}${storageBadge}</div>
+                            <div class="image-name">${img.name}</div>
                         </div>
                     `;
-                    card.onclick = () => openLightbox(date, index);
+                    card.onclick = (e) => handleCardClick(e, date, index);
                     grid.appendChild(card);
                 });
                 
                 section.appendChild(grid);
                 mainContent.appendChild(section);
+            });
+        }
+
+        function handleCardClick(e, date, index) {
+            if (e.target.closest('.checkbox') || selectedImages.size > 0) {
+                toggleSelect(date, index);
+            } else {
+                openLightbox(date, index);
+            }
+        }
+
+        function toggleSelect(date, index) {
+            const imgData = galleryData[date][index];
+            const key = `${date}/${index}`;
+            const card = document.querySelector(`[data-date="${date}"][data-index="${index}"]`);
+            
+            if (selectedImages.has(key)) {
+                selectedImages.delete(key);
+                card.classList.remove('selected');
+            } else {
+                selectedImages.add(key);
+                card.classList.add('selected');
+            }
+            
+            updateSelectionUI();
+        }
+
+        function selectAll(date) {
+            const images = galleryData[date];
+            const allSelected = images.every((_, index) => selectedImages.has(`${date}/${index}`));
+            
+            images.forEach((_, index) => {
+                const key = `${date}/${index}`;
+                const card = document.querySelector(`[data-date="${date}"][data-index="${index}"]`);
+                
+                if (allSelected) {
+                    selectedImages.delete(key);
+                    card.classList.remove('selected');
+                } else {
+                    selectedImages.add(key);
+                    card.classList.add('selected');
+                }
+            });
+            
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const count = selectedImages.size;
+            document.getElementById('selectionCount').textContent = `已选择 ${count} 张`;
+            document.getElementById('batchDownloadBtn').disabled = count === 0;
+            
+            const bar = document.getElementById('selectionBar');
+            if (count > 0) {
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        }
+
+        function clearSelection() {
+            selectedImages.clear();
+            document.querySelectorAll('.image-card.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+            updateSelectionUI();
+        }
+
+        function batchDownload() {
+            const images = Array.from(selectedImages).map(key => {
+                const [date, index] = key.split('/');
+                return galleryData[date][index].original;
+            });
+            
+            images.forEach((url, i) => {
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = url.split('/').pop();
+                    a.click();
+                }, i * 500);
             });
         }
 
@@ -469,7 +921,7 @@
                 loading.textContent = '加载失败';
             };
             
-            img.src = imageData.url;
+            img.src = getPreviewUrl(imageData.original);
         }
 
         function updateLightboxInfo() {
@@ -478,8 +930,12 @@
             document.getElementById('counter').textContent = `${currentIndex + 1} / ${currentImageList.length}`;
             
             const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.href = imageData.url;
+            downloadBtn.href = imageData.original;
             downloadBtn.download = imageData.name;
+        }
+
+        function toggleSelectCurrent() {
+            toggleSelect(currentDate, currentIndex);
         }
 
         function closeLightbox() {
@@ -509,7 +965,101 @@
             if (e.key === 'ArrowLeft') prevImage();
         });
 
+        // Upload functionality
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+            document.getElementById('uploadInput').value = '';
+            document.getElementById('uploadPreview').innerHTML = '';
+            document.getElementById('uploadStatus').textContent = '';
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('uploadPreview');
+            preview.innerHTML = '';
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const div = document.createElement('div');
+                        div.className = 'upload-preview-item';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" alt="${file.name}">
+                            <span>${file.name}</span>
+                        `;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        async function uploadImages() {
+            const files = document.getElementById('uploadInput').files;
+            if (files.length === 0) {
+                document.getElementById('uploadStatus').textContent = '请选择图片';
+                return;
+            }
+
+            const status = document.getElementById('uploadStatus');
+            status.textContent = '上传中...';
+
+            const formData = new FormData();
+            Array.from(files).forEach(file => {
+                formData.append('images', file);
+            });
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    status.textContent = `上传成功: ${result.files.length} 张图片`;
+                    setTimeout(() => {
+                        closeUploadModal();
+                        location.reload();
+                    }, 1500);
+                } else {
+                    status.textContent = '上传失败';
+                }
+            } catch (error) {
+                status.textContent = '上传错误: ' + error.message;
+            }
+        }
+
+        document.getElementById('uploadInput').addEventListener('change', handleFileSelect);
+
         initGallery();
     </script>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>上传图片</h3>
+                <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="uploadInput" multiple accept="image/*" style="display: none;">
+                <button class="upload-select-btn" onclick="document.getElementById('uploadInput').click()">
+                    选择图片
+                </button>
+                <div class="upload-preview" id="uploadPreview"></div>
+                <div class="upload-status" id="uploadStatus"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeUploadModal()">取消</button>
+                <button class="modal-btn primary" onclick="uploadImages()">上传</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
