@@ -655,6 +655,8 @@
         });
         if (sessionStorage.getItem('galleryAuth') === 'true') {
             document.getElementById('passwordLayer').style.display = 'none';
+            window.galleryReady = true;
+            if (window.initGalleryPending) initGallery();
         }
     </script>
 
@@ -1037,7 +1039,12 @@
 
         document.getElementById('uploadInput').addEventListener('change', handleFileSelect);
 
-        initGallery();
+        // Only init gallery if password verified or already authenticated
+        if (window.galleryReady || sessionStorage.getItem('galleryAuth') === 'true') {
+            initGallery();
+        } else {
+            window.initGalleryPending = true;
+        }
     </script>
 
     <!-- Upload Modal -->
