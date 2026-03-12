@@ -762,6 +762,15 @@
         let selectedImages = new Set();
 
         function getPreviewUrl(originalPath) {
+            // Handle uploaded images (full Cloudinary URL stored in galleryData)
+            if (originalPath.startsWith('http')) {
+                // Extract public_id from Cloudinary URL and generate thumbnail
+                const match = originalPath.match(/image-gallery\/(.+?)\.jpg/);
+                if (match) {
+                    return `https://res.cloudinary.com/dkwyvhifz/image/upload/w_300,h_300,c_fit/image-gallery/${match[1]}.jpg`;
+                }
+                return originalPath; // Fallback
+            }
             // Convert PNG path to JPG for Cloudinary thumbnail
             // originalPath: "2026-03-11/filename.png" -> "2026-03-11/filename.jpg"
             const jpgPath = originalPath.replace('.png', '.jpg');
@@ -769,6 +778,10 @@
         }
 
         function getOriginalUrl(originalPath) {
+            // Handle uploaded images (full Cloudinary URL stored in galleryData)
+            if (originalPath.startsWith('http')) {
+                return originalPath;
+            }
             // Convert PNG path to JPG for Cloudinary original
             const jpgPath = originalPath.replace('.png', '.jpg');
             return `https://res.cloudinary.com/dkwyvhifz/image/upload/image-gallery/${jpgPath}`;
@@ -1152,9 +1165,12 @@
                 const today = new Date().toISOString().split('T')[0];
                 const newImages = uploadedUrls.map(url => {
                     const filename = url.split('/').pop();
+                    // Extract public_id from Cloudinary URL for proper path
+                    const publicIdMatch = url.match(/image-gallery\/(.+?)\.jpg/);
+                    const originalPath = publicIdMatch ? publicIdMatch[1] + '.png' : `uploaded/${filename}`;
                     return {
                         name: filename,
-                        original: `uploaded/${filename}`,
+                        original: originalPath,
                         url: url,
                         date: today
                     };
@@ -1166,6 +1182,11 @@
                 
                 // Update galleryData
                 galleryData['最近上传'] = uploadedImages;
+                
+                // Also add to date folder if date exists in galleryData
+                if (galleryData[today]) {
+                    galleryData[today] = newImages.concat(galleryData[today]);
+                }
                 
                 // Refresh gallery display
                 refreshGallery();
