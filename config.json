@@ -1,0 +1,9 @@
+{
+  "cloudinary": {
+    "cloudName": "dkwyvhifz",
+    "folder": "image-gallery"
+  },
+  "github": {
+    "repo": "hectoeleebanana-arch/image-gallery"
+  }
+}
