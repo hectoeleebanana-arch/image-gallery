@@ -758,21 +758,16 @@
         let selectedImages = new Set();
 
         function getPreviewUrl(originalPath) {
-            // Use Cloudinary for thumbnails (w_300,h_300,c_fit)
-            // Try .jpg first (compressed), fallback to .png
-            const basePath = originalPath.replace('.png', '');
-            const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-            // Add cache buster to force refresh
-            return `${cloudinaryBase}/w_300,h_300,c_fit/${basePath}.jpg?v=2`;
+            // Convert PNG path to JPG for Cloudinary thumbnail
+            // originalPath: "2026-03-11/filename.png" -> "2026-03-11/filename.jpg"
+            const jpgPath = originalPath.replace('.png', '.jpg');
+            return `https://res.cloudinary.com/dkwyvhifz/image/upload/w_300,h_300,c_fit/image-gallery/${jpgPath}`;
         }
 
         function getOriginalUrl(originalPath) {
-            // Use Cloudinary for original images
-            // Try .jpg first (compressed), fallback to .png
-            const basePath = originalPath.replace('.png', '');
-            const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-            // Add cache buster to force refresh
-            return `${cloudinaryBase}/${basePath}.jpg?v=2`;
+            // Convert PNG path to JPG for Cloudinary original
+            const jpgPath = originalPath.replace('.png', '.jpg');
+            return `https://res.cloudinary.com/dkwyvhifz/image/upload/image-gallery/${jpgPath}`;
         }
 
         function initGallery() {
