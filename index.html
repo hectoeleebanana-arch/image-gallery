@@ -765,11 +765,13 @@
             // Handle uploaded images (full Cloudinary URL stored in galleryData)
             if (originalPath.startsWith('http')) {
                 // Extract public_id from Cloudinary URL and generate thumbnail
+                // URL format: https://res.cloudinary.com/.../image-gallery/path/filename.jpg
                 const match = originalPath.match(/image-gallery\/(.+?)\.jpg/);
                 if (match) {
                     return `https://res.cloudinary.com/dkwyvhifz/image/upload/w_300,h_300,c_fit/image-gallery/${match[1]}.jpg`;
                 }
-                return originalPath; // Fallback
+                // If no match, try to use the URL directly with transformation
+                return originalPath.replace('/upload/', '/upload/w_300,h_300,c_fit/');
             }
             // Convert PNG path to JPG for Cloudinary thumbnail
             // originalPath: "2026-03-11/filename.png" -> "2026-03-11/filename.jpg"
