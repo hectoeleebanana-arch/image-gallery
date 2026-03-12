@@ -639,6 +639,9 @@
     </div>
 
     <script>
+        // Clear auth on page load to always show password (remove this line if you want to remember auth)
+        // sessionStorage.removeItem('galleryAuth');
+
         function checkPassword() {
             const input = document.getElementById('passwordInput').value;
             if (input === '5104') {
@@ -653,10 +656,14 @@
         document.getElementById('passwordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkPassword();
         });
+
+        // Check auth status on load
         if (sessionStorage.getItem('galleryAuth') === 'true') {
             document.getElementById('passwordLayer').style.display = 'none';
             window.galleryReady = true;
-            if (window.initGalleryPending) initGallery();
+        } else {
+            // Ensure password layer is visible
+            document.getElementById('passwordLayer').style.display = 'flex';
         }
     </script>
 
