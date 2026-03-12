@@ -758,27 +758,19 @@
         let selectedImages = new Set();
 
         function getPreviewUrl(originalPath) {
-            // Use Cloudinary for thumbnails if available, otherwise use original
-            // originalPath format: "image-gallery/2026-03-11/filename.png"
+            // Use Cloudinary for thumbnails (w_300,h_300,c_fit)
+            // Try .jpg first (compressed), fallback to .png
+            const basePath = originalPath.replace('.png', '');
             const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-            // Try Cloudinary thumbnail first (w_300,h_300,c_fit)
-            const thumbnailUrl = `${cloudinaryBase}/w_300,h_300,c_fit/${originalPath}`;
-            return thumbnailUrl;
+            return `${cloudinaryBase}/w_300,h_300,c_fit/${basePath}.jpg`;
         }
 
         function getOriginalUrl(originalPath) {
-            // For large images not on Cloudinary, fallback to GitHub Pages
-            // Check if it's a known small file (under 10MB) that's on Cloudinary
-            const smallFiles = ['2026-03-09/', '2026-03-10/', '2026-03-11/car-ad-0'];
-            const isSmallFile = smallFiles.some(prefix => originalPath.includes(prefix));
-            
-            if (isSmallFile) {
-                const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-                return `${cloudinaryBase}/${originalPath}`;
-            }
-            
-            // Fallback to GitHub Pages for large files
-            return originalPath;
+            // Use Cloudinary for original images
+            // Try .jpg first (compressed), fallback to .png
+            const basePath = originalPath.replace('.png', '');
+            const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
+            return `${cloudinaryBase}/${basePath}.jpg`;
         }
 
         function initGallery() {
