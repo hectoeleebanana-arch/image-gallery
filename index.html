@@ -708,8 +708,20 @@
     </div>
 
     <script>
-        // Load uploaded images from localStorage
+        // Load uploaded images from localStorage and fix paths
         let uploadedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
+        // Fix old format images (convert uploaded/xxx.jpg to proper Cloudinary path)
+        uploadedImages = uploadedImages.map(img => {
+            if (img.original && img.original.startsWith('uploaded/')) {
+                // Extract filename and create proper Cloudinary URL
+                const filename = img.original.replace('uploaded/', '');
+                const date = img.date || new Date().toISOString().split('T')[0];
+                img.original = `${date}/${filename.replace('.jpg', '.png')}`;
+            }
+            return img;
+        });
+        // Save fixed images back to localStorage
+        localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages));
 
         const galleryData = {
             "最近上传": uploadedImages,
@@ -1183,10 +1195,11 @@
                 // Update galleryData
                 galleryData['最近上传'] = uploadedImages;
                 
-                // Also add to date folder if date exists in galleryData
-                if (galleryData[today]) {
-                    galleryData[today] = newImages.concat(galleryData[today]);
+                // Also add to date folder (create if not exists)
+                if (!galleryData[today]) {
+                    galleryData[today] = [];
                 }
+                galleryData[today] = newImages.concat(galleryData[today]);
                 
                 // Refresh gallery display
                 refreshGallery();
