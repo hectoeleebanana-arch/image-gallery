@@ -639,8 +639,8 @@
     </div>
 
     <script>
-        // Clear auth on page load to always show password (remove this line if you want to remember auth)
-        // sessionStorage.removeItem('galleryAuth');
+        // Force clear auth on page load (v2)
+        sessionStorage.removeItem('galleryAuth');
 
         function checkPassword() {
             const input = document.getElementById('passwordInput').value;
