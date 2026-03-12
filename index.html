@@ -708,7 +708,11 @@
     </div>
 
     <script>
+        // Load uploaded images from localStorage
+        let uploadedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
+
         const galleryData = {
+            "最近上传": uploadedImages,
             "2026-03-11": [
                 {name: "puppy-test-2026-03-11.png", original: "2026-03-11/puppy-test-2026-03-11.png"},
                 {name: "car-ad-side-v2-04-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-04-2026-03-11.png"},
@@ -1144,6 +1148,28 @@
                     }
                 }
 
+                // Add uploaded images to localStorage and galleryData
+                const today = new Date().toISOString().split('T')[0];
+                const newImages = uploadedUrls.map(url => {
+                    const filename = url.split('/').pop();
+                    return {
+                        name: filename,
+                        original: `uploaded/${filename}`,
+                        url: url,
+                        date: today
+                    };
+                });
+                
+                // Save to localStorage
+                uploadedImages = newImages.concat(uploadedImages);
+                localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages));
+                
+                // Update galleryData
+                galleryData['最近上传'] = uploadedImages;
+                
+                // Refresh gallery display
+                refreshGallery();
+
                 // Display URLs with copy buttons
                 const urlListHtml = uploadedUrls.map((url, index) => `
                     <div style="margin: 8px 0; word-break: break-all;">
@@ -1152,11 +1178,20 @@
                     </div>
                 `).join('');
 
-                status.innerHTML = `<div style="text-align: left;"><strong>上传成功!</strong><br>${urlListHtml}</div>`;
+                status.innerHTML = `<div style="text-align: left;"><strong>上传成功! 已添加到"最近上传"</strong><br>${urlListHtml}</div>`;
             } catch (error) {
                 status.textContent = '上传错误: ' + error.message;
                 console.error('Cloudinary upload error:', error);
             }
+        }
+
+        function refreshGallery() {
+            // Clear and re-render gallery
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            sidebar.innerHTML = '';
+            mainContent.innerHTML = '';
+            initGallery();
         }
 
         // Only init gallery if password verified or already authenticated
