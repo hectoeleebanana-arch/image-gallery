@@ -1053,10 +1053,16 @@
             }
         }
 
-        document.getElementById('cloudinaryInput').addEventListener('change', handleCloudinaryFileSelect);
-
         // Cloudinary Upload functionality
         let cloudinaryFiles = [];
+
+        // Bind event listener after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const cloudinaryInput = document.getElementById('cloudinaryInput');
+            if (cloudinaryInput) {
+                cloudinaryInput.addEventListener('change', handleCloudinaryFileSelect);
+            }
+        });
 
         function openCloudinaryModal() {
             document.getElementById('cloudinaryModal').classList.add('active');
