@@ -762,7 +762,8 @@
             // Try .jpg first (compressed), fallback to .png
             const basePath = originalPath.replace('.png', '');
             const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-            return `${cloudinaryBase}/w_300,h_300,c_fit/${basePath}.jpg`;
+            // Add cache buster to force refresh
+            return `${cloudinaryBase}/w_300,h_300,c_fit/${basePath}.jpg?v=2`;
         }
 
         function getOriginalUrl(originalPath) {
@@ -770,7 +771,8 @@
             // Try .jpg first (compressed), fallback to .png
             const basePath = originalPath.replace('.png', '');
             const cloudinaryBase = 'https://res.cloudinary.com/dkwyvhifz/image/upload';
-            return `${cloudinaryBase}/${basePath}.jpg`;
+            // Add cache buster to force refresh
+            return `${cloudinaryBase}/${basePath}.jpg?v=2`;
         }
 
         function initGallery() {
