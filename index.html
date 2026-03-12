@@ -670,7 +670,6 @@
     <header>
         <h1>Image Gallery</h1>
         <div class="header-actions">
-            <button class="header-btn" onclick="openUploadModal()">上传图片</button>
             <button class="header-btn" onclick="openCloudinaryModal()">上传到 Cloudinary</button>
             <button class="header-btn" id="batchDownloadBtn" onclick="batchDownload()" disabled>批量下载</button>
         </div>
@@ -1045,7 +1044,6 @@
             }
         }
 
-        document.getElementById('uploadInput').addEventListener('change', handleFileSelect);
         document.getElementById('cloudinaryInput').addEventListener('change', handleCloudinaryFileSelect);
 
         // Cloudinary Upload functionality
@@ -1153,28 +1151,6 @@
             window.initGalleryPending = true;
         }
     </script>
-
-    <!-- Upload Modal -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>上传图片</h3>
-                <button class="modal-close" onclick="closeUploadModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="file" id="uploadInput" multiple accept="image/*" style="display: none;">
-                <button class="upload-select-btn" onclick="document.getElementById('uploadInput').click()">
-                    选择图片
-                </button>
-                <div class="upload-preview" id="uploadPreview"></div>
-                <div class="upload-status" id="uploadStatus"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" onclick="closeUploadModal()">取消</button>
-                <button class="modal-btn primary" onclick="uploadImages()">上传</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Cloudinary Upload Modal -->
     <div class="modal" id="cloudinaryModal">
