@@ -804,7 +804,7 @@
                     card.dataset.original = img.original;
                     card.innerHTML = `
                         <div class="checkbox"></div>
-                        <img src="${getPreviewUrl(img.original)}" alt="${img.name}" loading="lazy">
+                        <img src="${getPreviewUrl(img.original)}" alt="${img.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23333%22 width=%22100%22 height=%22100%22/><text fill=%22%23666%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22>加载失败</text></svg>'; console.error('Failed to load:', '${getPreviewUrl(img.original)}')">
                         <div class="image-info">
                             <div class="image-name">${img.name}</div>
                         </div>
