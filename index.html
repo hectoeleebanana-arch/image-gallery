@@ -648,7 +648,13 @@
                 document.getElementById('passwordLayer').style.display = 'none';
                 sessionStorage.setItem('galleryAuth', 'true');
                 // Initialize gallery after password correct
-                setTimeout(initGallery, 100);
+                setTimeout(() => {
+                    if (window.initGalleryWithAPI) {
+                        window.initGalleryWithAPI();
+                    } else {
+                        initGallery();
+                    }
+                }, 100);
             } else {
                 document.getElementById('passwordError').style.display = 'block';
             }
@@ -708,10 +714,35 @@
     </div>
 
     <script>
+        // API 配置
+        const API_BASE_URL = 'https://image-gallery-api.hectoeleebanana.workers.dev/api';
+        
         // Load uploaded images from localStorage
         let uploadedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
-
-        const galleryData = {
+        
+        // 动态获取的 gallery 数据
+        let galleryData = {};
+        
+        // 从 API 获取图片列表
+        async function fetchImages() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/images`);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        galleryData = result.data;
+                        // 合并本地上传的图片
+                        if (uploadedImages.length > 0) {
+                            galleryData['最近上传'] = uploadedImages;
+                        }
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to fetch images:', e);
+            }
+            // 如果 API 失败，使用硬编码数据
+            galleryData = {
             "最近上传": uploadedImages,
             "2026-03-11": [
                 {name: "puppy-test-2026-03-11.png", original: "2026-03-11/puppy-test-2026-03-11.png"},
@@ -1215,10 +1246,16 @@
         }
 
         // Only init gallery if password verified or already authenticated
-        if (window.galleryReady || sessionStorage.getItem('galleryAuth') === 'true') {
+        async function initGalleryWithAPI() {
+            await fetchImages();
             initGallery();
+        }
+        
+        if (window.galleryReady || sessionStorage.getItem('galleryAuth') === 'true') {
+            initGalleryWithAPI();
         } else {
             window.initGalleryPending = true;
+            window.initGalleryWithAPI = initGalleryWithAPI;
         }
     </script>
 
