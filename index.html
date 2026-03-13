@@ -23,27 +23,38 @@
         .date-section { display: none; }
         .date-section.active { display: block; }
         .date-header { font-size: 24px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .select-all-btn { padding: 6px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 13px; cursor: pointer; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-        .image-card { position: relative; background: #1c1c1e; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 21/9; border: 2px solid transparent; }
+        .image-card { position: relative; background: #1c1c1e; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 16/9; border: 2px solid transparent; }
         .image-card:hover { transform: scale(1.02); }
-        .image-card.selected { border-color: #007aff; }
-        .image-card img { width: 100%; height: 100%; object-fit: cover; }
-        .checkbox { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.5); border-radius: 4px; background: rgba(0,0,0,0.5); }
+        .image-card.selected { border-color: #007aff; box-shadow: 0 0 0 2px #007aff; }
+        .checkbox { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.5); border-radius: 4px; background: rgba(0,0,0,0.5); z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+        .select-mode .checkbox, .image-card.selected .checkbox { opacity: 1; }
         .image-card.selected .checkbox { background: #007aff; border-color: #007aff; }
-        .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
+        #selectionBox { position: fixed; border: 2px dashed #007aff; background: rgba(0,122,255,0.1); pointer-events: none; display: none; z-index: 50; }
         .selection-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(28,28,30,0.95); padding: 12px 24px; border-radius: 30px; display: none; align-items: center; gap: 16px; z-index: 150; border: 1px solid rgba(255,255,255,0.1); }
         .selection-bar.active { display: flex; }
+        .upload-btn { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #007aff; border: none; color: #fff; font-size: 24px; cursor: pointer; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .upload-btn:hover { background: #0051d5; }
+        .upload-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
+        .upload-modal.active { display: flex; }
+        .upload-content { background: #1c1c1e; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; }
+        .upload-area { border: 2px dashed rgba(255,255,255,0.3); border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; }
+        .upload-area:hover { border-color: #007aff; }
+        .upload-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 16px; max-height: 200px; overflow-y: auto; }
+        .upload-preview img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; }
+        .lightbox { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); display: none; z-index: 400; }
+        .lightbox.active { display: flex; flex-direction: column; }
+        .lightbox-header { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .lightbox-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .lightbox-img { max-width: 90%; max-height: 80vh; object-fit: contain; }
+        .lightbox-footer { height: 60px; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .image-card img { width: 100%; height: 100%; object-fit: cover; }
+        .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
         .modal.active { display: flex; }
         .modal-content { background: #1c1c1e; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; }
-        .upload-select-btn { width: 100%; padding: 40px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255,255,255,0.6); cursor: pointer; }
-        .upload-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 16px; }
-        .upload-preview-item { aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
-        .upload-preview-item img { width: 100%; height: 100%; object-fit: cover; }
-        #selectionBox { position: fixed; border: 2px dashed #007aff; background: rgba(0,122,255,0.1); pointer-events: none; display: none; z-index: 50; }
         #passwordLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } .api-status { display: none; } }
+        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } }
     </style>
 </head>
 <body>
@@ -53,7 +64,6 @@
             <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6);">请输入密码</p>
             <input type="password" id="passwordInput" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; margin-bottom: 15px;">
             <button onclick="checkPassword()" style="width: 100%; padding: 12px; background: #007aff; border: none; border-radius: 6px; color: #fff; cursor: pointer;">进入</button>
-            <p id="passwordError" style="color: #ff3b30; font-size: 13px; margin-top: 10px; display: none;">密码错误</p>
         </div>
     </div>
 
@@ -62,8 +72,7 @@
         <div class="header-actions">
             <span class="api-status" id="apiStatus">连接中...</span>
             <button class="header-btn" onclick="refreshGallery()">刷新</button>
-            <button class="header-btn" onclick="openUploadModal()">上传</button>
-            <button class="header-btn" id="batchDownloadBtn" onclick="batchDownload()" disabled>下载</button>
+            <button class="header-btn" id="selectModeBtn" onclick="toggleSelectMode()">选择</button>
         </div>
     </header>
 
@@ -74,22 +83,44 @@
 
     <div class="selection-bar" id="selectionBar">
         <span id="selectionCount">已选择 0 张</span>
+        <button class="header-btn" onclick="selectAllVisible()">全选</button>
         <button class="header-btn" onclick="batchDownload()">下载</button>
         <button class="header-btn" onclick="batchDelete()">删除</button>
         <button class="header-btn" onclick="clearSelection()">取消</button>
     </div>
 
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <h3>上传图片</h3>
-            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-            <button class="upload-select-btn" onclick="document.getElementById('fileInput').click()">选择图片</button>
-            <div id="uploadPreview"></div>
-            <div id="uploadStatus"></div>
-            <div style="margin-top: 15px; text-align: right;">
-                <button class="header-btn" onclick="closeUploadModal()">取消</button>
+    <button class="upload-btn" onclick="openUpload()">+</button>
+
+    <div class="upload-modal" id="uploadModal">
+        <div class="upload-content">
+            <h3 style="margin-bottom: 16px;">上传图片</h3>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p>点击选择图片</p>
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+            </div>
+            <div class="upload-preview" id="uploadPreview"></div>
+            <div id="uploadStatus" style="margin-top: 12px; text-align: center;"></div>
+            <div style="margin-top: 16px; text-align: right;">
+                <button class="header-btn" onclick="closeUpload()" style="margin-right: 8px;">取消</button>
                 <button class="header-btn" onclick="uploadFiles()">上传</button>
             </div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-header">
+            <span id="lightboxTitle">图片查看</span>
+            <button class="header-btn" onclick="closeLightbox()">关闭</button>
+        </div>
+        <div class="lightbox-content">
+            <img class="lightbox-img" id="lightboxImg" src="" alt="">
+        </div>
+        <div class="lightbox-footer">
+            <button class="header-btn" onclick="downloadCurrent()">下载</button>
+            <button class="header-btn" onclick="deleteCurrent()" style="background: #ff3b30;">删除</button>
+            <button class="header-btn" onclick="prevImage()">上一张</button>
+            <span id="lightboxCounter">1 / 1</span>
+            <button class="header-btn" onclick="nextImage()">下一张</button>
         </div>
     </div>
 
@@ -106,8 +137,6 @@
                 document.getElementById('passwordLayer').style.display = 'none';
                 sessionStorage.setItem('galleryAuth', 'true');
                 initGallery();
-            } else {
-                document.getElementById('passwordError').style.display = 'block';
             }
         }
 
@@ -154,11 +183,11 @@
 
             currentDate = dates[0];
 
-            dates.forEach(date => {
+            dates.forEach(function(date) {
                 const item = document.createElement('div');
                 item.className = 'sidebar-item' + (date === currentDate ? ' active' : '');
                 item.innerHTML = date + ' <span class="count">' + galleryData[date].length + '</span>';
-                item.onclick = function() { switchDate(date); };
+                item.onclick = function(e) { switchDate(date, e); };
                 sidebar.appendChild(item);
 
                 const section = document.createElement('div');
@@ -167,7 +196,7 @@
 
                 const header = document.createElement('div');
                 header.className = 'date-header';
-                header.innerHTML = '<span>' + date + '</span><button class="select-all-btn" onclick="selectAll(\'' + date + '\')">全选</button>';
+                header.textContent = date;
                 section.appendChild(header);
 
                 const grid = document.createElement('div');
@@ -178,8 +207,15 @@
                     card.className = 'image-card';
                     card.dataset.date = date;
                     card.dataset.index = index;
+                    card.dataset.publicId = img.public_id || '';
                     card.innerHTML = '<div class="checkbox"></div><img src="' + img.thumb + '" alt="' + img.name + '" loading="lazy">';
-                    card.onclick = function(e) { handleCardClick(e, date, index); };
+                    card.onclick = function(e) { 
+                        if (selectMode) {
+                            toggleSelect(date, index);
+                        } else {
+                            openLightbox(date, index);
+                        }
+                    };
                     grid.appendChild(card);
                 });
 
@@ -188,17 +224,34 @@
             });
         }
 
-        function switchDate(date) {
+        function switchDate(date, e) {
             currentDate = date;
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            document.querySelectorAll('.date-section').forEach(s => s.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.sidebar-item').forEach(function(i) { i.classList.remove('active'); });
+            document.querySelectorAll('.date-section').forEach(function(s) { s.classList.remove('active'); });
+            if (e && e.target) e.target.classList.add('active');
             document.getElementById('section-' + date).classList.add('active');
         }
 
-        function handleCardClick(e, date, index) {
-            if (e.target.closest('.checkbox') || selectedImages.size > 0) {
-                toggleSelect(date, index);
+        function refreshGallery() {
+            initGallery();
+        }
+
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            const btn = document.getElementById('selectModeBtn');
+            const bar = document.getElementById('selectionBar');
+            if (selectMode) {
+                btn.textContent = '完成';
+                btn.style.background = '#34c759';
+                document.body.classList.add('select-mode');
+                bar.classList.add('active');
+                updateSelectionUI();
+            } else {
+                btn.textContent = '选择';
+                btn.style.background = '#007aff';
+                document.body.classList.remove('select-mode');
+                bar.classList.remove('active');
+                clearSelection();
             }
         }
 
@@ -215,163 +268,448 @@
             updateSelectionUI();
         }
 
-        function selectAll(date) {
-            const images = galleryData[date];
-            const allSelected = images.every(function(_, i) { return selectedImages.has(date + '/' + i); });
-            images.forEach(function(_, i) {
-                const key = date + '/' + i;
-                const card = document.querySelector('[data-date="' + date + '"][data-index="' + i + '"]');
-                if (allSelected) {
-                    selectedImages.delete(key);
-                    card.classList.remove('selected');
-                } else {
-                    selectedImages.add(key);
-                    card.classList.add('selected');
-                }
-            });
-            updateSelectionUI();
-        }
-
         function updateSelectionUI() {
             const count = selectedImages.size;
             document.getElementById('selectionCount').textContent = '已选择 ' + count + ' 张';
-            document.getElementById('batchDownloadBtn').disabled = count === 0;
-            document.getElementById('selectionBar').classList.toggle('active', count > 0);
+            // 选择模式开启时始终显示选择栏
+            if (selectMode) {
+                document.getElementById('selectionBar').classList.add('active');
+            } else {
+                document.getElementById('selectionBar').classList.remove('active');
+            }
         }
 
         function clearSelection() {
             selectedImages.clear();
-            document.querySelectorAll('.image-card.selected').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.image-card.selected').forEach(function(c) { c.classList.remove('selected'); });
             updateSelectionUI();
-        }
-
-        function batchDownload() {
-            selectedImages.forEach(function(key) {
-                const parts = key.split('/');
-                const url = galleryData[parts[0]][parts[1]].original;
-                window.open(url, '_blank');
-            });
         }
 
         async function batchDelete() {
             if (!confirm('确定删除选中的 ' + selectedImages.size + ' 张图片？')) return;
+            
+            let deleted = 0;
             for (const key of Array.from(selectedImages)) {
                 const parts = key.split('/');
                 const img = galleryData[parts[0]][parts[1]];
-                if (img.public_id) {
-                    await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), { method: 'DELETE' });
+                if (img && img.public_id) {
+                    try {
+                        const response = await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), { 
+                            method: 'DELETE' 
+                        });
+                        if (response.ok) deleted++;
+                    } catch (e) {
+                        console.error('删除失败:', e);
+                    }
                 }
             }
+            
+            alert('已删除 ' + deleted + ' 张图片');
             clearSelection();
             initGallery();
         }
 
-        function refreshGallery() {
-            initGallery();
+        async function downloadImage(url, filename) {
+            try {
+                // 先获取图片数据
+                const response = await fetch(url);
+                const blob = await response.blob();
+                
+                // 创建 blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename || 'image.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // 清理 blob URL
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (e) {
+                console.error('下载失败:', e);
+                // 降级方案：直接打开
+                window.open(url, '_blank');
+            }
         }
 
-        function openUploadModal() {
+        async function batchDownload() {
+            if (selectedImages.size === 0) return;
+            
+            const status = document.getElementById('selectionCount');
+            const originalText = status.textContent;
+            
+            let downloaded = 0;
+            const total = selectedImages.size;
+            
+            for (const key of Array.from(selectedImages)) {
+                const parts = key.split('/');
+                const img = galleryData[parts[0]][parts[1]];
+                if (img && img.original) {
+                    status.textContent = '下载中 (' + (downloaded + 1) + '/' + total + ')';
+                    await downloadImage(img.original, img.name);
+                    downloaded++;
+                    // 等待一小段时间，避免浏览器限制
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            }
+            
+            status.textContent = '已下载 ' + downloaded + ' 张';
+            setTimeout(function() {
+                status.textContent = originalText;
+            }, 2000);
+        }
+
+        let selectedFiles = [];
+        let currentLightboxDate = null;
+        let currentLightboxIndex = 0;
+        let selectMode = false;
+
+        function openLightbox(date, index) {
+            currentLightboxDate = date;
+            currentLightboxIndex = index;
+            updateLightbox();
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        function updateLightbox() {
+            const img = galleryData[currentLightboxDate][currentLightboxIndex];
+            document.getElementById('lightboxImg').src = img.original;
+            document.getElementById('lightboxTitle').textContent = img.name;
+            document.getElementById('lightboxCounter').textContent = (currentLightboxIndex + 1) + ' / ' + galleryData[currentLightboxDate].length;
+        }
+
+        function prevImage() {
+            if (currentLightboxIndex > 0) {
+                currentLightboxIndex--;
+                updateLightbox();
+            }
+        }
+
+        function nextImage() {
+            if (currentLightboxIndex < galleryData[currentLightboxDate].length - 1) {
+                currentLightboxIndex++;
+                updateLightbox();
+            }
+        }
+
+        function downloadCurrent() {
+            const img = galleryData[currentLightboxDate][currentLightboxIndex];
+            downloadImage(img.original, img.name);
+        }
+
+        async function deleteCurrent() {
+            const img = galleryData[currentLightboxDate][currentLightboxIndex];
+            if (!img || !img.public_id) {
+                alert('无法删除：缺少图片信息');
+                return;
+            }
+            
+            if (!confirm('确定要删除这张图片吗？')) return;
+            
+            try {
+                const response = await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // 删除成功，关闭大图并刷新
+                    closeLightbox();
+                    initGallery();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (e) {
+                console.error('删除错误:', e);
+                alert('删除错误: ' + e.message);
+            }
+        }
+
+        function openUpload() {
             document.getElementById('uploadModal').classList.add('active');
             document.getElementById('fileInput').value = '';
             document.getElementById('uploadPreview').innerHTML = '';
             document.getElementById('uploadStatus').textContent = '';
+            selectedFiles = [];
         }
 
-        function closeUploadModal() {
+        function closeUpload() {
             document.getElementById('uploadModal').classList.remove('active');
         }
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
             const preview = document.getElementById('uploadPreview');
             preview.innerHTML = '';
-            Array.from(e.target.files).forEach(function(file) {
+            
+            selectedFiles.forEach(function(file) {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        const div = document.createElement('div');
-                        div.className = 'upload-preview-item';
-                        div.innerHTML = '<img src="' + e.target.result + '">';
-                        preview.appendChild(div);
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        preview.appendChild(img);
                     };
                     reader.readAsDataURL(file);
                 }
             });
         });
 
-        async function uploadFiles() {
-            const files = document.getElementById('fileInput').files;
-            if (files.length === 0) return;
-
-            const status = document.getElementById('uploadStatus');
-            status.textContent = '上传中...';
-
-            for (let i = 0; i < files.length; i++) {
-                const formData = new FormData();
-                formData.append('file', files[i]);
-                try {
-                    await fetch(API_BASE_URL + '/upload', { method: 'POST', body: formData });
-                    status.textContent = '已上传 ' + (i + 1) + '/' + files.length;
-                } catch (e) {
-                    status.textContent = '上传失败: ' + e.message;
+        async function compressImage(file, maxSizeMB) {
+            return new Promise(function(resolve, reject) {
+                if (file.size <= maxSizeMB * 1024 * 1024) {
+                    resolve(file);
+                    return;
                 }
-            }
 
-            setTimeout(function() {
-                closeUploadModal();
-                initGallery();
-            }, 1000);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 保持原始尺寸
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // 尝试不同的质量级别，直到文件大小符合要求
+                        let quality = 0.9;
+                        const tryCompress = function() {
+                            canvas.toBlob(function(blob) {
+                                if (!blob) {
+                                    reject(new Error('压缩失败'));
+                                    return;
+                                }
+                                
+                                if (blob.size <= maxSizeMB * 1024 * 1024 || quality <= 0.3) {
+                                    const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+                                        type: 'image/jpeg',
+                                        lastModified: Date.now()
+                                    });
+                                    resolve(compressedFile);
+                                } else {
+                                    quality -= 0.1;
+                                    canvas.toBlob(function(newBlob) {
+                                        if (newBlob && newBlob.size <= maxSizeMB * 1024 * 1024) {
+                                            const compressedFile = new File([newBlob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+                                                type: 'image/jpeg',
+                                                lastModified: Date.now()
+                                            });
+                                            resolve(compressedFile);
+                                        } else {
+                                            tryCompress();
+                                        }
+                                    }, 'image/jpeg', quality);
+                                }
+                            }, 'image/jpeg', quality);
+                        };
+                        
+                        tryCompress();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
-        // 鼠标框选功能
-        let isSelecting = false, startX, startY;
-        const selectionBox = document.getElementById('selectionBox');
-        const mainContent = document.getElementById('mainContent');
+        async function uploadFiles() {
+            if (selectedFiles.length === 0) {
+                alert('请先选择图片');
+                return;
+            }
 
-        mainContent.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.image-card')) return;
-            isSelecting = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            selectionBox.style.left = startX + 'px';
-            selectionBox.style.top = startY + 'px';
-            selectionBox.style.width = '0px';
-            selectionBox.style.height = '0px';
-            selectionBox.style.display = 'block';
-            e.preventDefault();
-        });
+            const status = document.getElementById('uploadStatus');
+            status.textContent = '准备上传 (0/' + selectedFiles.length + ')';
 
-        document.addEventListener('mousemove', function(e) {
-            if (!isSelecting) return;
-            const left = Math.min(startX, e.clientX);
-            const top = Math.min(startY, e.clientY);
-            const width = Math.abs(e.clientX - startX);
-            const height = Math.abs(e.clientY - startY);
-            selectionBox.style.left = left + 'px';
-            selectionBox.style.top = top + 'px';
-            selectionBox.style.width = width + 'px';
-            selectionBox.style.height = height + 'px';
-        });
+            let uploaded = 0;
+            let failed = 0;
+            const CLOUDINARY_CLOUD = 'dkwyvhifz';
+            const FOLDER = 'image-gallery';
+            const MAX_SIZE_MB = 10;
 
-        document.addEventListener('mouseup', function() {
-            if (!isSelecting) return;
-            isSelecting = false;
-            selectionBox.style.display = 'none';
-            const boxRect = selectionBox.getBoundingClientRect();
-            document.querySelectorAll('.image-card').forEach(function(card) {
-                const cardRect = card.getBoundingClientRect();
-                if (!(boxRect.right < cardRect.left || boxRect.left > cardRect.right ||
-                      boxRect.bottom < cardRect.top || boxRect.top > cardRect.bottom)) {
-                    const date = card.dataset.date;
-                    const index = card.dataset.index;
-                    toggleSelect(date, index);
+            for (let i = 0; i < selectedFiles.length; i++) {
+                status.textContent = '处理中 (' + (i + 1) + '/' + selectedFiles.length + ')';
+                
+                let file = selectedFiles[i];
+                
+                // 压缩大于 10MB 的图片
+                if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                    try {
+                        status.textContent = '压缩中 (' + (i + 1) + '/' + selectedFiles.length + ')';
+                        file = await compressImage(file, MAX_SIZE_MB);
+                    } catch (e) {
+                        console.error('压缩失败:', e);
+                        failed++;
+                        continue;
+                    }
                 }
-            });
-        });
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'image-gallery-unsigned');
+                formData.append('folder', FOLDER + '/' + new Date().toISOString().split('T')[0]);
+
+                try {
+                    const response = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        uploaded++;
+                    } else {
+                        const error = await response.text();
+                        console.error('上传失败:', error);
+                        failed++;
+                    }
+                } catch (e) {
+                    failed++;
+                    console.error('上传错误:', e);
+                }
+
+                status.textContent = '上传中 (' + (i + 1) + '/' + selectedFiles.length + ')';
+            }
+
+            status.textContent = '上传完成: ' + uploaded + ' 成功' + (failed > 0 ? ', ' + failed + ' 失败' : '');
+            
+            setTimeout(function() {
+                closeUpload();
+                initGallery();
+            }, 1500);
+        }
 
         if (sessionStorage.getItem('galleryAuth') === 'true') {
             document.getElementById('passwordLayer').style.display = 'none';
             initGallery();
         }
+
+        // 全选当前标签页
+        function selectAllVisible() {
+            const visibleCards = document.querySelectorAll('.date-section.active .image-card, .main-content .image-card');
+            visibleCards.forEach(function(card) {
+                const date = card.dataset.date;
+                const index = card.dataset.index;
+                const key = date + '/' + index;
+                selectedImages.add(key);
+                card.classList.add('selected');
+            });
+            updateSelectionUI();
+        }
+
+        // 鼠标框选功能
+        (function initDragSelect() {
+            const main = document.getElementById('mainContent');
+            const box = document.getElementById('selectionBox');
+            let isDragging = false;
+            let hasDragged = false;
+            let startX, startY;
+            let dragThreshold = 5;
+
+            main.addEventListener('mousedown', function(e) {
+                // 点击图片时，如果不是选择模式，让点击事件处理
+                if (e.target.closest('.image-card') && !selectMode) return;
+                // 点击图片时，选择模式下启动框选
+                if (e.target.closest('.image-card') && selectMode) {
+                    // 让点击事件处理选择
+                    return;
+                }
+                
+                isDragging = true;
+                hasDragged = false;
+                startX = e.clientX;
+                startY = e.clientY;
+                
+                box.style.left = startX + 'px';
+                box.style.top = startY + 'px';
+                box.style.width = '0px';
+                box.style.height = '0px';
+                box.style.display = 'block';
+                
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const x = Math.min(startX, e.clientX);
+                const y = Math.min(startY, e.clientY);
+                const w = Math.abs(e.clientX - startX);
+                const h = Math.abs(e.clientY - startY);
+                
+                box.style.left = x + 'px';
+                box.style.top = y + 'px';
+                box.style.width = w + 'px';
+                box.style.height = h + 'px';
+                
+                // 超过阈值，标记为拖拽
+                if ((w > dragThreshold || h > dragThreshold) && !hasDragged) {
+                    hasDragged = true;
+                    // 未在选择模式时，自动进入选择模式
+                    if (!selectMode) {
+                        toggleSelectMode();
+                    }
+                }
+                
+                // 实时视觉反馈
+                if (hasDragged) {
+                    const boxRect = box.getBoundingClientRect();
+                    main.querySelectorAll('.image-card').forEach(function(card) {
+                        const cardRect = card.getBoundingClientRect();
+                        const intersect = !(boxRect.right < cardRect.left || 
+                                          boxRect.left > cardRect.right || 
+                                          boxRect.bottom < cardRect.top || 
+                                          boxRect.top > cardRect.bottom);
+                        
+                        const key = card.dataset.date + '/' + card.dataset.index;
+                        if (intersect) {
+                            card.classList.add('selected');
+                        } else {
+                            // 只移除本次框选临时添加的，保留已确认的
+                            if (!selectedImages.has(key)) {
+                                card.classList.remove('selected');
+                            }
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                box.style.display = 'none';
+                
+                // 没有拖拽或距离太小，视为点击，不处理（让点击事件处理）
+                if (!hasDragged) {
+                    box.style.display = 'none';
+                    return;
+                }
+                
+                // 确认选中的卡片
+                main.querySelectorAll('.image-card.selected').forEach(function(card) {
+                    const key = card.dataset.date + '/' + card.dataset.index;
+                    selectedImages.add(key);
+                });
+                
+                updateSelectionUI();
+            });
+        })();
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') prevImage();
+                if (e.key === 'ArrowRight') nextImage();
+            }
+        });
     </script>
 </body>
 </html>
