@@ -38,6 +38,10 @@
         .modal.active { display: flex; }
         .modal-content { background: #1c1c1e; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; }
         .upload-select-btn { width: 100%; padding: 40px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255,255,255,0.6); cursor: pointer; }
+        .upload-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 16px; }
+        .upload-preview-item { aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
+        .upload-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        #selectionBox { position: fixed; border: 2px dashed #007aff; background: rgba(0,122,255,0.1); pointer-events: none; display: none; z-index: 50; }
         #passwordLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } .api-status { display: none; } }
     </style>
@@ -88,6 +92,8 @@
             </div>
         </div>
     </div>
+
+    <div id="selectionBox"></div>
 
     <script>
         const API_BASE_URL = 'https://image-gallery-api.hectoeleebanana.workers.dev/api';
@@ -266,11 +272,31 @@
 
         function openUploadModal() {
             document.getElementById('uploadModal').classList.add('active');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadPreview').innerHTML = '';
+            document.getElementById('uploadStatus').textContent = '';
         }
 
         function closeUploadModal() {
             document.getElementById('uploadModal').classList.remove('active');
         }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const preview = document.getElementById('uploadPreview');
+            preview.innerHTML = '';
+            Array.from(e.target.files).forEach(function(file) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'upload-preview-item';
+                        div.innerHTML = '<img src="' + e.target.result + '">';
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
 
         async function uploadFiles() {
             const files = document.getElementById('fileInput').files;
@@ -295,6 +321,52 @@
                 initGallery();
             }, 1000);
         }
+
+        // 鼠标框选功能
+        let isSelecting = false, startX, startY;
+        const selectionBox = document.getElementById('selectionBox');
+        const mainContent = document.getElementById('mainContent');
+
+        mainContent.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.image-card')) return;
+            isSelecting = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            selectionBox.style.left = startX + 'px';
+            selectionBox.style.top = startY + 'px';
+            selectionBox.style.width = '0px';
+            selectionBox.style.height = '0px';
+            selectionBox.style.display = 'block';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isSelecting) return;
+            const left = Math.min(startX, e.clientX);
+            const top = Math.min(startY, e.clientY);
+            const width = Math.abs(e.clientX - startX);
+            const height = Math.abs(e.clientY - startY);
+            selectionBox.style.left = left + 'px';
+            selectionBox.style.top = top + 'px';
+            selectionBox.style.width = width + 'px';
+            selectionBox.style.height = height + 'px';
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (!isSelecting) return;
+            isSelecting = false;
+            selectionBox.style.display = 'none';
+            const boxRect = selectionBox.getBoundingClientRect();
+            document.querySelectorAll('.image-card').forEach(function(card) {
+                const cardRect = card.getBoundingClientRect();
+                if (!(boxRect.right < cardRect.left || boxRect.left > cardRect.right ||
+                      boxRect.bottom < cardRect.top || boxRect.top > cardRect.bottom)) {
+                    const date = card.dataset.date;
+                    const index = card.dataset.index;
+                    toggleSelect(date, index);
+                }
+            });
+        });
 
         if (sessionStorage.getItem('galleryAuth') === 'true') {
             document.getElementById('passwordLayer').style.display = 'none';
