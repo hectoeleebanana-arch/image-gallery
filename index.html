@@ -651,8 +651,13 @@
                 setTimeout(() => {
                     if (window.initGalleryWithAPI) {
                         window.initGalleryWithAPI();
-                    } else {
+                    } else if (typeof initGallery === 'function') {
                         initGallery();
+                    } else {
+                        console.error('initGallery not defined yet, retrying...');
+                        setTimeout(() => {
+                            if (typeof initGallery === 'function') initGallery();
+                        }, 500);
                     }
                 }, 100);
             } else {
