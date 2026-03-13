@@ -9,9 +9,11 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: #fff; min-height: 100vh; }
         header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); }
         header h1 { font-size: 17px; font-weight: 600; }
-        .header-actions { display: flex; gap: 10px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
         .header-btn { padding: 6px 14px; background: #007aff; border: none; border-radius: 6px; color: #fff; font-size: 13px; cursor: pointer; }
         .header-btn:hover { background: #0051d5; }
+        .header-btn:disabled { background: rgba(255,255,255,0.2); cursor: not-allowed; }
+        .api-status { font-size: 12px; color: rgba(255,255,255,0.5); margin-right: 10px; }
         .sidebar { position: fixed; left: 0; top: 52px; bottom: 0; width: 200px; background: rgba(28,28,30,0.8); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); padding: 20px 0; overflow-y: auto; z-index: 90; }
         .sidebar-item { padding: 12px 20px; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.7); border-left: 3px solid transparent; }
         .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
@@ -20,14 +22,24 @@
         .main-content { margin-left: 200px; padding: 72px 20px 40px; min-height: 100vh; }
         .date-section { display: none; }
         .date-section.active { display: block; }
-        .date-header { font-size: 24px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .date-header { font-size: 24px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .select-all-btn { padding: 6px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 13px; cursor: pointer; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-        .image-card { position: relative; background: #1c1c1e; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 16/9; }
+        .image-card { position: relative; background: #1c1c1e; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 21/9; border: 2px solid transparent; }
         .image-card:hover { transform: scale(1.02); }
+        .image-card.selected { border-color: #007aff; }
         .image-card img { width: 100%; height: 100%; object-fit: cover; }
+        .checkbox { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.5); border-radius: 4px; background: rgba(0,0,0,0.5); }
+        .image-card.selected .checkbox { background: #007aff; border-color: #007aff; }
         .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
+        .selection-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(28,28,30,0.95); padding: 12px 24px; border-radius: 30px; display: none; align-items: center; gap: 16px; z-index: 150; border: 1px solid rgba(255,255,255,0.1); }
+        .selection-bar.active { display: flex; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
+        .modal.active { display: flex; }
+        .modal-content { background: #1c1c1e; border-radius: 12px; width: 90%; max-width: 500px; padding: 20px; }
+        .upload-select-btn { width: 100%; padding: 40px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255,255,255,0.6); cursor: pointer; }
         #passwordLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } }
+        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } .api-status { display: none; } }
     </style>
 </head>
 <body>
@@ -37,13 +49,17 @@
             <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6);">请输入密码</p>
             <input type="password" id="passwordInput" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; margin-bottom: 15px;">
             <button onclick="checkPassword()" style="width: 100%; padding: 12px; background: #007aff; border: none; border-radius: 6px; color: #fff; cursor: pointer;">进入</button>
+            <p id="passwordError" style="color: #ff3b30; font-size: 13px; margin-top: 10px; display: none;">密码错误</p>
         </div>
     </div>
 
     <header>
         <h1>Image Gallery</h1>
         <div class="header-actions">
-            <button class="header-btn" onclick="loadImages()">刷新</button>
+            <span class="api-status" id="apiStatus">连接中...</span>
+            <button class="header-btn" onclick="refreshGallery()">刷新</button>
+            <button class="header-btn" onclick="openUploadModal()">上传</button>
+            <button class="header-btn" id="batchDownloadBtn" onclick="batchDownload()" disabled>下载</button>
         </div>
     </header>
 
@@ -52,84 +68,117 @@
         <div class="loading">加载中...</div>
     </div>
 
+    <div class="selection-bar" id="selectionBar">
+        <span id="selectionCount">已选择 0 张</span>
+        <button class="header-btn" onclick="batchDownload()">下载</button>
+        <button class="header-btn" onclick="batchDelete()">删除</button>
+        <button class="header-btn" onclick="clearSelection()">取消</button>
+    </div>
+
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <h3>上传图片</h3>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+            <button class="upload-select-btn" onclick="document.getElementById('fileInput').click()">选择图片</button>
+            <div id="uploadPreview"></div>
+            <div id="uploadStatus"></div>
+            <div style="margin-top: 15px; text-align: right;">
+                <button class="header-btn" onclick="closeUploadModal()">取消</button>
+                <button class="header-btn" onclick="uploadFiles()">上传</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE_URL = 'https://image-gallery-api.hectoeleebanana.workers.dev/api';
         let galleryData = {};
         let currentDate = null;
+        let selectedImages = new Set();
 
         function checkPassword() {
             if (document.getElementById('passwordInput').value === '5104') {
                 document.getElementById('passwordLayer').style.display = 'none';
-                loadImages();
+                sessionStorage.setItem('galleryAuth', 'true');
+                initGallery();
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
             }
         }
 
-        async function loadImages() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading">加载中...</div>';
-            
+        async function initGallery() {
+            updateApiStatus('loading');
             try {
-                const response = await fetch(`${API_BASE_URL}/images`);
+                const response = await fetch(API_BASE_URL + '/images');
                 const result = await response.json();
-                
                 if (result.success) {
                     galleryData = result.data;
                     renderGallery();
+                    updateApiStatus('connected');
                 } else {
-                    mainContent.innerHTML = '<div class="loading">加载失败</div>';
+                    updateApiStatus('error', '加载失败');
                 }
             } catch (e) {
-                mainContent.innerHTML = '<div class="loading">错误: ' + e.message + '</div>';
+                updateApiStatus('error', e.message);
             }
+        }
+
+        function updateApiStatus(status, msg) {
+            const el = document.getElementById('apiStatus');
+            if (status === 'loading') el.textContent = '加载中...';
+            else if (status === 'connected') el.textContent = '已连接';
+            else el.textContent = '错误: ' + msg;
         }
 
         function renderGallery() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
+            const main = document.getElementById('mainContent');
             sidebar.innerHTML = '';
-            mainContent.innerHTML = '';
-            
+            main.innerHTML = '';
+
             const dates = Object.keys(galleryData).sort((a, b) => {
                 if (a === '最近上传') return -1;
                 if (b === '最近上传') return 1;
                 return b.localeCompare(a);
             });
-            
+
             if (dates.length === 0) {
-                mainContent.innerHTML = '<div class="loading">暂无图片</div>';
+                main.innerHTML = '<div class="loading">暂无图片</div>';
                 return;
             }
-            
+
             currentDate = dates[0];
-            
+
             dates.forEach(date => {
                 const item = document.createElement('div');
                 item.className = 'sidebar-item' + (date === currentDate ? ' active' : '');
                 item.innerHTML = date + ' <span class="count">' + galleryData[date].length + '</span>';
-                item.onclick = () => switchDate(date);
+                item.onclick = function() { switchDate(date); };
                 sidebar.appendChild(item);
-                
+
                 const section = document.createElement('div');
                 section.className = 'date-section' + (date === currentDate ? ' active' : '');
                 section.id = 'section-' + date;
-                
+
                 const header = document.createElement('div');
                 header.className = 'date-header';
-                header.textContent = date;
+                header.innerHTML = '<span>' + date + '</span><button class="select-all-btn" onclick="selectAll(\'' + date + '\')">全选</button>';
                 section.appendChild(header);
-                
+
                 const grid = document.createElement('div');
                 grid.className = 'grid';
-                
-                galleryData[date].forEach(img => {
+
+                galleryData[date].forEach(function(img, index) {
                     const card = document.createElement('div');
                     card.className = 'image-card';
-                    card.innerHTML = '<img src="' + img.thumb + '" alt="' + img.name + '" loading="lazy">';
+                    card.dataset.date = date;
+                    card.dataset.index = index;
+                    card.innerHTML = '<div class="checkbox"></div><img src="' + img.thumb + '" alt="' + img.name + '" loading="lazy">';
+                    card.onclick = function(e) { handleCardClick(e, date, index); };
                     grid.appendChild(card);
                 });
-                
+
                 section.appendChild(grid);
-                mainContent.appendChild(section);
+                main.appendChild(section);
             });
         }
 
@@ -139,6 +188,117 @@
             document.querySelectorAll('.date-section').forEach(s => s.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById('section-' + date).classList.add('active');
+        }
+
+        function handleCardClick(e, date, index) {
+            if (e.target.closest('.checkbox') || selectedImages.size > 0) {
+                toggleSelect(date, index);
+            }
+        }
+
+        function toggleSelect(date, index) {
+            const key = date + '/' + index;
+            const card = document.querySelector('[data-date="' + date + '"][data-index="' + index + '"]');
+            if (selectedImages.has(key)) {
+                selectedImages.delete(key);
+                card.classList.remove('selected');
+            } else {
+                selectedImages.add(key);
+                card.classList.add('selected');
+            }
+            updateSelectionUI();
+        }
+
+        function selectAll(date) {
+            const images = galleryData[date];
+            const allSelected = images.every(function(_, i) { return selectedImages.has(date + '/' + i); });
+            images.forEach(function(_, i) {
+                const key = date + '/' + i;
+                const card = document.querySelector('[data-date="' + date + '"][data-index="' + i + '"]');
+                if (allSelected) {
+                    selectedImages.delete(key);
+                    card.classList.remove('selected');
+                } else {
+                    selectedImages.add(key);
+                    card.classList.add('selected');
+                }
+            });
+            updateSelectionUI();
+        }
+
+        function updateSelectionUI() {
+            const count = selectedImages.size;
+            document.getElementById('selectionCount').textContent = '已选择 ' + count + ' 张';
+            document.getElementById('batchDownloadBtn').disabled = count === 0;
+            document.getElementById('selectionBar').classList.toggle('active', count > 0);
+        }
+
+        function clearSelection() {
+            selectedImages.clear();
+            document.querySelectorAll('.image-card.selected').forEach(c => c.classList.remove('selected'));
+            updateSelectionUI();
+        }
+
+        function batchDownload() {
+            selectedImages.forEach(function(key) {
+                const parts = key.split('/');
+                const url = galleryData[parts[0]][parts[1]].original;
+                window.open(url, '_blank');
+            });
+        }
+
+        async function batchDelete() {
+            if (!confirm('确定删除选中的 ' + selectedImages.size + ' 张图片？')) return;
+            for (const key of Array.from(selectedImages)) {
+                const parts = key.split('/');
+                const img = galleryData[parts[0]][parts[1]];
+                if (img.public_id) {
+                    await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), { method: 'DELETE' });
+                }
+            }
+            clearSelection();
+            initGallery();
+        }
+
+        function refreshGallery() {
+            initGallery();
+        }
+
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+        }
+
+        async function uploadFiles() {
+            const files = document.getElementById('fileInput').files;
+            if (files.length === 0) return;
+
+            const status = document.getElementById('uploadStatus');
+            status.textContent = '上传中...';
+
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData();
+                formData.append('file', files[i]);
+                try {
+                    await fetch(API_BASE_URL + '/upload', { method: 'POST', body: formData });
+                    status.textContent = '已上传 ' + (i + 1) + '/' + files.length;
+                } catch (e) {
+                    status.textContent = '上传失败: ' + e.message;
+                }
+            }
+
+            setTimeout(function() {
+                closeUploadModal();
+                initGallery();
+            }, 1000);
+        }
+
+        if (sessionStorage.getItem('galleryAuth') === 'true') {
+            document.getElementById('passwordLayer').style.display = 'none';
+            initGallery();
         }
     </script>
 </body>
