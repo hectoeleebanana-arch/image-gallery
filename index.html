@@ -5,835 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #000;
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 52px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        header h1 {
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .header-btn {
-            padding: 6px 14px;
-            background: #007aff;
-            border: none;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .header-btn:hover {
-            background: #0051d5;
-        }
-
-        .header-btn:disabled {
-            background: rgba(255, 255, 255, 0.2);
-            cursor: not-allowed;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 52px;
-            bottom: 0;
-            width: 200px;
-            background: rgba(28, 28, 30, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px 0;
-            overflow-y: auto;
-            z-index: 90;
-        }
-
-        .sidebar-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-left-color: #007aff;
-        }
-
-        .sidebar-item .count {
-            float: right;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-
-        .main-content {
-            margin-left: 200px;
-            padding: 72px 20px 40px;
-            min-height: 100vh;
-        }
-
-        .date-section {
-            display: none;
-        }
-
-        .date-section.active {
-            display: block;
-        }
-
-        .date-header {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .select-all-btn {
-            padding: 6px 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .select-all-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
-        }
-
-        .image-card {
-            position: relative;
-            background: #1c1c1e;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            aspect-ratio: 21/9;
-            border: 2px solid transparent;
-        }
-
-        .image-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .image-card.selected {
-            border-color: #007aff;
-            box-shadow: 0 0 0 2px #007aff;
-        }
-
-        .image-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .checkbox {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.2s ease;
-        }
-
-        .image-card.selected .checkbox {
-            background: #007aff;
-            border-color: #007aff;
-        }
-
-        .checkbox::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background: #fff;
-            border-radius: 2px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .image-card.selected .checkbox::after {
-            opacity: 1;
-        }
-
-        .image-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .image-card:hover .image-info {
-            opacity: 1;
-        }
-
-        .image-name {
-            font-size: 11px;
-            font-weight: 500;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .lightbox {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            flex-direction: column;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .lightbox.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .lightbox-header {
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .lightbox-title {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 40%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .lightbox-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .lightbox-btn {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s ease;
-        }
-
-        .lightbox-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .lightbox-btn.primary {
-            background: #007aff;
-            border-color: #007aff;
-        }
-
-        .lightbox-btn.primary:hover {
-            background: #0051d5;
-        }
-
-        .lightbox-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-        }
-
-        .lightbox-img {
-            max-width: 90%;
-            max-height: 80vh;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-prev { left: 20px; }
-        .nav-next { right: 20px; }
-
-        .lightbox-footer {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-        }
-
-        .selection-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 24px;
-            border-radius: 30px;
-            display: none;
-            align-items: center;
-            gap: 16px;
-            z-index: 150;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .selection-bar.active {
-            display: flex;
-        }
-
-        .selection-count {
-            font-size: 14px;
-            color: #fff;
-        }
-
-        .selection-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .selection-btn {
-            padding: 8px 16px;
-            background: #007aff;
-            border: none;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .selection-btn:hover {
-            background: #0051d5;
-        }
-
-        .selection-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .selection-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: #1c1c1e;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 50vh;
-            overflow-y: auto;
-        }
-
-        .upload-select-btn {
-            width: 100%;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .upload-select-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .upload-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin-top: 16px;
-        }
-
-        .upload-preview-item {
-            aspect-ratio: 1;
-            border-radius: 6px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .upload-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .upload-preview-item span {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 4px;
-            background: rgba(0, 0, 0, 0.7);
-            font-size: 10px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .upload-status {
-            margin-top: 12px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-        }
-
-        .modal-footer {
-            padding: 16px 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .modal-btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            transition: background 0.2s ease;
-        }
-
-        .modal-btn.primary {
-            background: #007aff;
-            color: #fff;
-        }
-
-        .modal-btn.primary:hover {
-            background: #0051d5;
-        }
-
-        .modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-
-        .modal-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                top: auto;
-                bottom: 0;
-                display: flex;
-                overflow-x: auto;
-                border-right: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 10px;
-            }
-            
-            .sidebar-item {
-                white-space: nowrap;
-                border-left: none;
-                border-bottom: 2px solid transparent;
-            }
-            
-            .sidebar-item.active {
-                border-left-color: transparent;
-                border-bottom-color: #007aff;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                margin-bottom: 100px;
-                padding: 72px 12px 30px;
-            }
-            
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 8px;
-            }
-
-            .lightbox-header {
-                padding: 0 10px;
-            }
-
-            .lightbox-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
-            .selection-bar {
-                left: 10px;
-                right: 10px;
-                transform: none;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: #fff; min-height: 100vh; }
+        header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        header h1 { font-size: 17px; font-weight: 600; }
+        .header-actions { display: flex; gap: 10px; }
+        .header-btn { padding: 6px 14px; background: #007aff; border: none; border-radius: 6px; color: #fff; font-size: 13px; cursor: pointer; }
+        .header-btn:hover { background: #0051d5; }
+        .sidebar { position: fixed; left: 0; top: 52px; bottom: 0; width: 200px; background: rgba(28,28,30,0.8); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); padding: 20px 0; overflow-y: auto; z-index: 90; }
+        .sidebar-item { padding: 12px 20px; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.7); border-left: 3px solid transparent; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .sidebar-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left-color: #007aff; }
+        .sidebar-item .count { float: right; font-size: 12px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; }
+        .main-content { margin-left: 200px; padding: 72px 20px 40px; min-height: 100vh; }
+        .date-section { display: none; }
+        .date-section.active { display: block; }
+        .date-header { font-size: 24px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .image-card { position: relative; background: #1c1c1e; border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 16/9; }
+        .image-card:hover { transform: scale(1.02); }
+        .image-card img { width: 100%; height: 100%; object-fit: cover; }
+        .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
+        #passwordLayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; top: auto; bottom: 0; display: flex; overflow-x: auto; padding: 10px; } .main-content { margin-left: 0; margin-bottom: 100px; } }
     </style>
 </head>
 <body>
-    <!-- Password Protection Layer -->
-    <div id="passwordLayer" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <h2 style="font-size: 24px; margin-bottom: 30px; font-weight: 600;">Image Gallery</h2>
+    <div id="passwordLayer">
+        <h2 style="font-size: 24px; margin-bottom: 30px;">Image Gallery</h2>
         <div style="background: #1c1c1e; padding: 30px; border-radius: 12px; width: 300px;">
-            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6); font-size: 14px;">请输入密码</p>
-            <input type="password" id="passwordInput" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 16px; margin-bottom: 15px;" placeholder="密码">
-            <button onclick="checkPassword()" style="width: 100%; padding: 12px; background: #007aff; border: none; border-radius: 6px; color: #fff; font-size: 14px; cursor: pointer; font-weight: 500;">进入</button>
-            <p id="passwordError" style="color: #ff3b30; font-size: 13px; margin-top: 10px; display: none; text-align: center;">密码错误</p>
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6);">请输入密码</p>
+            <input type="password" id="passwordInput" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; margin-bottom: 15px;">
+            <button onclick="checkPassword()" style="width: 100%; padding: 12px; background: #007aff; border: none; border-radius: 6px; color: #fff; cursor: pointer;">进入</button>
         </div>
     </div>
-
-    <script>
-        // Force clear auth on page load (v2)
-        sessionStorage.removeItem('galleryAuth');
-
-        function checkPassword() {
-            const input = document.getElementById('passwordInput').value;
-            if (input === '5104') {
-                document.getElementById('passwordLayer').style.display = 'none';
-                sessionStorage.setItem('galleryAuth', 'true');
-                // Initialize gallery after password correct
-                setTimeout(() => {
-                    if (window.initGalleryWithAPI) {
-                        window.initGalleryWithAPI();
-                    } else if (typeof initGallery === 'function') {
-                        initGallery();
-                    } else {
-                        console.error('initGallery not defined yet, retrying...');
-                        setTimeout(() => {
-                            if (typeof initGallery === 'function') initGallery();
-                        }, 500);
-                    }
-                }, 100);
-            } else {
-                document.getElementById('passwordError').style.display = 'block';
-            }
-        }
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') checkPassword();
-        });
-
-        // Check auth status on load
-        if (sessionStorage.getItem('galleryAuth') === 'true') {
-            document.getElementById('passwordLayer').style.display = 'none';
-            window.galleryReady = true;
-        } else {
-            // Ensure password layer is visible
-            document.getElementById('passwordLayer').style.display = 'flex';
-        }
-    </script>
 
     <header>
         <h1>Image Gallery</h1>
         <div class="header-actions">
-            <button class="header-btn" onclick="openCloudinaryModal()">上传到 Cloudinary</button>
-            <button class="header-btn" id="batchDownloadBtn" onclick="batchDownload()" disabled>批量下载</button>
+            <button class="header-btn" onclick="loadImages()">刷新</button>
         </div>
     </header>
 
     <div class="sidebar" id="sidebar"></div>
-
-    <div class="main-content" id="mainContent"></div>
-
-    <div class="lightbox" id="lightbox">
-        <div class="lightbox-header">
-            <div class="lightbox-title" id="lightboxTitle">图片查看</div>
-            <div class="lightbox-actions">
-                <a href="#" class="lightbox-btn primary" id="downloadBtn" download>下载原图</a>
-                <button class="lightbox-btn" onclick="toggleSelectCurrent()">选择</button>
-                <button class="lightbox-btn" onclick="closeLightbox()">关闭</button>
-            </div>
-        </div>
-        <div class="lightbox-content">
-            <button class="nav-btn nav-prev" onclick="prevImage()">&lsaquo;</button>
-            <div class="loading" id="loading">加载中...</div>
-            <img src="" alt="" class="lightbox-img" id="lightboxImg" style="display: none;">
-            <button class="nav-btn nav-next" onclick="nextImage()">&rsaquo;</button>
-        </div>
-        <div class="lightbox-footer">
-            <span id="counter">1 / 1</span>
-        </div>
-    </div>
-
-    <div class="selection-bar" id="selectionBar">
-        <span class="selection-count" id="selectionCount">已选择 0 张</span>
-        <div class="selection-actions">
-            <button class="selection-btn" onclick="batchDownload()">下载选中</button>
-            <button class="selection-btn secondary" onclick="clearSelection()">取消</button>
-        </div>
+    <div class="main-content" id="mainContent">
+        <div class="loading">加载中...</div>
     </div>
 
     <script>
-        // API 配置
         const API_BASE_URL = 'https://image-gallery-api.hectoeleebanana.workers.dev/api';
-        
-        // Load uploaded images from localStorage
-        let uploadedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
-        
-        // 动态获取的 gallery 数据
         let galleryData = {};
-        
-        // 从 API 获取图片列表
-        async function fetchImages() {
+        let currentDate = null;
+
+        function checkPassword() {
+            if (document.getElementById('passwordInput').value === '5104') {
+                document.getElementById('passwordLayer').style.display = 'none';
+                loadImages();
+            }
+        }
+
+        async function loadImages() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading">加载中...</div>';
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/images`);
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success) {
-                        galleryData = result.data;
-                        // 合并本地上传的图片
-                        if (uploadedImages.length > 0) {
-                            galleryData['最近上传'] = uploadedImages;
-                        }
-                        return true;
-                    }
+                const result = await response.json();
+                
+                if (result.success) {
+                    galleryData = result.data;
+                    renderGallery();
+                } else {
+                    mainContent.innerHTML = '<div class="loading">加载失败</div>';
                 }
             } catch (e) {
-                console.error('Failed to fetch images:', e);
+                mainContent.innerHTML = '<div class="loading">错误: ' + e.message + '</div>';
             }
-            // 如果 API 失败，使用硬编码数据
-            galleryData = {
-                "最近上传": uploadedImages,
-            "2026-03-11": [
-                {name: "puppy-test-2026-03-11.png", original: "2026-03-11/puppy-test-2026-03-11.png"},
-                {name: "car-ad-side-v2-04-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-04-2026-03-11.png"},
-                {name: "car-ad-side-v2-03-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-03-2026-03-11.png"},
-                {name: "car-ad-side-v2-02-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-02-2026-03-11.png"},
-                {name: "car-ad-side-v2-01-2026-03-11.png", original: "2026-03-11/car-ad-side-v2-01-2026-03-11.png"},
-                {name: "car-ad-side-04-2026-03-11.png", original: "2026-03-11/car-ad-side-04-2026-03-11.png"},
-                {name: "car-ad-side-03-2026-03-11.png", original: "2026-03-11/car-ad-side-03-2026-03-11.png"},
-                {name: "car-ad-side-02-2026-03-11.png", original: "2026-03-11/car-ad-side-02-2026-03-11.png"},
-                {name: "car-ad-side-01-2026-03-11.png", original: "2026-03-11/car-ad-side-01-2026-03-11.png"},
-                {name: "car-ad-front-04-2026-03-11.png", original: "2026-03-11/car-ad-front-04-2026-03-11.png"},
-                {name: "car-ad-front-03-2026-03-11.png", original: "2026-03-11/car-ad-front-03-2026-03-11.png"},
-                {name: "car-ad-front-02-2026-03-11.png", original: "2026-03-11/car-ad-front-02-2026-03-11.png"},
-                {name: "car-ad-front-01-2026-03-11.png", original: "2026-03-11/car-ad-front-01-2026-03-11.png"},
-                {name: "car-ad-closeup-04-2026-03-11.png", original: "2026-03-11/car-ad-closeup-04-2026-03-11.png"},
-                {name: "car-ad-closeup-03-2026-03-11.png", original: "2026-03-11/car-ad-closeup-03-2026-03-11.png"},
-                {name: "car-ad-closeup-02-2026-03-11.png", original: "2026-03-11/car-ad-closeup-02-2026-03-11.png"},
-                {name: "car-ad-closeup-01-2026-03-11.png", original: "2026-03-11/car-ad-closeup-01-2026-03-11.png"},
-                {name: "car-ad-rooftop-04-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-04-2026-03-11.png"},
-                {name: "car-ad-rooftop-03-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-03-2026-03-11.png"},
-                {name: "car-ad-rooftop-02-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-02-2026-03-11.png"},
-                {name: "car-ad-rooftop-01-2026-03-11.png", original: "2026-03-11/car-ad-rooftop-01-2026-03-11.png"},
-                {name: "car-ad-wide-04-2026-03-11.png", original: "2026-03-11/car-ad-wide-04-2026-03-11.png"},
-                {name: "car-ad-wide-03-2026-03-11.png", original: "2026-03-11/car-ad-wide-03-2026-03-11.png"},
-                {name: "car-ad-wide-02-2026-03-11.png", original: "2026-03-11/car-ad-wide-02-2026-03-11.png"},
-                {name: "car-ad-wide-01-2026-03-11.png", original: "2026-03-11/car-ad-wide-01-2026-03-11.png"},
-                {name: "car-ad-04-2026-03-11.png", original: "2026-03-11/car-ad-04-2026-03-11.png"},
-                {name: "car-ad-03-2026-03-11.png", original: "2026-03-11/car-ad-03-2026-03-11.png"},
-                {name: "car-ad-02-2026-03-11.png", original: "2026-03-11/car-ad-02-2026-03-11.png"},
-                {name: "car-ad-01-2026-03-11.png", original: "2026-03-11/car-ad-01-2026-03-11.png"}
-            ],
-            "2026-03-10": [
-                {name: "westie-puppy-2026-03-10.png", original: "2026-03-10/westie-puppy-2026-03-10.png"},
-                {name: "pink-porsche-911-2026-03-10.png", original: "2026-03-10/pink-porsche-911-2026-03-10.png"},
-                {name: "magic-carpet-2026-03-10.png", original: "2026-03-10/magic-carpet-2026-03-10.png"},
-                {name: "labrador-2026-03-10.png", original: "2026-03-10/labrador-2026-03-10.png"}
-            ],
-            "2026-03-09": [
-                {name: "labrador-loki-2026-03-09.png", original: "2026-03-09/labrador-loki-2026-03-09.png"},
-                {name: "cat-sunshine-2026-03-09.png", original: "2026-03-09/cat-sunshine-2026-03-09.png"}
-            ]
-        };
         }
 
-        let currentDate = "2026-03-11";
-        let currentIndex = 0;
-        let currentImageList = [];
-        let selectedImages = new Set();
-
-        function getPreviewUrl(originalPath) {
-            // Handle uploaded images (full Cloudinary URL stored in galleryData)
-            if (originalPath.startsWith('http')) {
-                // Extract public_id from Cloudinary URL and generate thumbnail
-                // URL format: https://res.cloudinary.com/.../image-gallery/path/filename.jpg
-                const match = originalPath.match(/image-gallery\/(.+?)\.jpg/);
-                if (match) {
-                    return `https://res.cloudinary.com/dkwyvhifz/image/upload/w_300,h_300,c_fit/image-gallery/${match[1]}.jpg`;
-                }
-                // If no match, try to use the URL directly with transformation
-                return originalPath.replace('/upload/', '/upload/w_300,h_300,c_fit/');
-            }
-            // Convert PNG path to JPG for Cloudinary thumbnail
-            // originalPath: "2026-03-11/filename.png" -> "2026-03-11/filename.jpg"
-            const jpgPath = originalPath.replace('.png', '.jpg');
-            return `https://res.cloudinary.com/dkwyvhifz/image/upload/w_300,h_300,c_fit/image-gallery/${jpgPath}`;
-        }
-
-        function getOriginalUrl(originalPath) {
-            // Handle uploaded images (full Cloudinary URL stored in galleryData)
-            if (originalPath.startsWith('http')) {
-                return originalPath;
-            }
-            // Convert PNG path to JPG for Cloudinary original
-            const jpgPath = originalPath.replace('.png', '.jpg');
-            return `https://res.cloudinary.com/dkwyvhifz/image/upload/image-gallery/${jpgPath}`;
-        }
-
-        function initGallery() {
+        function renderGallery() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
+            sidebar.innerHTML = '';
+            mainContent.innerHTML = '';
             
-            Object.keys(galleryData).sort().reverse().forEach(date => {
+            const dates = Object.keys(galleryData).sort((a, b) => {
+                if (a === '最近上传') return -1;
+                if (b === '最近上传') return 1;
+                return b.localeCompare(a);
+            });
+            
+            if (dates.length === 0) {
+                mainContent.innerHTML = '<div class="loading">暂无图片</div>';
+                return;
+            }
+            
+            currentDate = dates[0];
+            
+            dates.forEach(date => {
                 const item = document.createElement('div');
                 item.className = 'sidebar-item' + (date === currentDate ? ' active' : '');
-                item.innerHTML = `${date} <span class="count">${galleryData[date].length}</span>`;
+                item.innerHTML = date + ' <span class="count">' + galleryData[date].length + '</span>';
                 item.onclick = () => switchDate(date);
                 sidebar.appendChild(item);
                 
@@ -843,29 +115,16 @@
                 
                 const header = document.createElement('div');
                 header.className = 'date-header';
-                header.innerHTML = `
-                    <span>${date}</span>
-                    <button class="select-all-btn" onclick="selectAll('${date}')">全选</button>
-                `;
+                header.textContent = date;
                 section.appendChild(header);
                 
                 const grid = document.createElement('div');
                 grid.className = 'grid';
                 
-                galleryData[date].forEach((img, index) => {
+                galleryData[date].forEach(img => {
                     const card = document.createElement('div');
                     card.className = 'image-card';
-                    card.dataset.date = date;
-                    card.dataset.index = index;
-                    card.dataset.original = img.original;
-                    card.innerHTML = `
-                        <div class="checkbox"></div>
-                        <img src="${getPreviewUrl(img.original)}" alt="${img.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23333%22 width=%22100%22 height=%22100%22/><text fill=%22%23666%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22>加载失败</text></svg>'; console.error('Failed to load:', '${getPreviewUrl(img.original)}')">
-                        <div class="image-info">
-                            <div class="image-name">${img.name}</div>
-                        </div>
-                    `;
-                    card.onclick = (e) => handleCardClick(e, date, index);
+                    card.innerHTML = '<img src="' + img.thumb + '" alt="' + img.name + '" loading="lazy">';
                     grid.appendChild(card);
                 });
                 
@@ -874,417 +133,13 @@
             });
         }
 
-        function handleCardClick(e, date, index) {
-            if (e.target.closest('.checkbox') || selectedImages.size > 0) {
-                toggleSelect(date, index);
-            } else {
-                openLightbox(date, index);
-            }
-        }
-
-        function toggleSelect(date, index) {
-            const imgData = galleryData[date][index];
-            const key = `${date}/${index}`;
-            const card = document.querySelector(`[data-date="${date}"][data-index="${index}"]`);
-            
-            if (selectedImages.has(key)) {
-                selectedImages.delete(key);
-                card.classList.remove('selected');
-            } else {
-                selectedImages.add(key);
-                card.classList.add('selected');
-            }
-            
-            updateSelectionUI();
-        }
-
-        function selectAll(date) {
-            const images = galleryData[date];
-            const allSelected = images.every((_, index) => selectedImages.has(`${date}/${index}`));
-            
-            images.forEach((_, index) => {
-                const key = `${date}/${index}`;
-                const card = document.querySelector(`[data-date="${date}"][data-index="${index}"]`);
-                
-                if (allSelected) {
-                    selectedImages.delete(key);
-                    card.classList.remove('selected');
-                } else {
-                    selectedImages.add(key);
-                    card.classList.add('selected');
-                }
-            });
-            
-            updateSelectionUI();
-        }
-
-        function updateSelectionUI() {
-            const count = selectedImages.size;
-            document.getElementById('selectionCount').textContent = `已选择 ${count} 张`;
-            document.getElementById('batchDownloadBtn').disabled = count === 0;
-            
-            const bar = document.getElementById('selectionBar');
-            if (count > 0) {
-                bar.classList.add('active');
-            } else {
-                bar.classList.remove('active');
-            }
-        }
-
-        function clearSelection() {
-            selectedImages.clear();
-            document.querySelectorAll('.image-card.selected').forEach(card => {
-                card.classList.remove('selected');
-            });
-            updateSelectionUI();
-        }
-
-        function batchDownload() {
-            const images = Array.from(selectedImages).map(key => {
-                const [date, index] = key.split('/');
-                return galleryData[date][index].original;
-            });
-            
-            images.forEach((url, i) => {
-                setTimeout(() => {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = url.split('/').pop();
-                    a.click();
-                }, i * 500);
-            });
-        }
-
         function switchDate(date) {
             currentDate = date;
-            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-            document.querySelectorAll('.date-section').forEach(section => section.classList.remove('active'));
-            
-            event.target.closest('.sidebar-item').classList.add('active');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.date-section').forEach(s => s.classList.remove('active'));
+            event.target.classList.add('active');
             document.getElementById('section-' + date).classList.add('active');
         }
-
-        function openLightbox(date, index) {
-            currentDate = date;
-            currentImageList = galleryData[date];
-            currentIndex = index;
-            
-            const lightbox = document.getElementById('lightbox');
-            const loading = document.getElementById('loading');
-            const img = document.getElementById('lightboxImg');
-            
-            loading.style.display = 'flex';
-            img.style.display = 'none';
-            lightbox.classList.add('active');
-            
-            updateLightboxInfo();
-            loadImage();
-        }
-
-        function loadImage() {
-            const img = document.getElementById('lightboxImg');
-            const loading = document.getElementById('loading');
-            const imageData = currentImageList[currentIndex];
-            
-            img.onload = () => {
-                loading.style.display = 'none';
-                img.style.display = 'block';
-            };
-            
-            img.onerror = () => {
-                loading.textContent = '加载失败';
-            };
-            
-            img.src = getOriginalUrl(imageData.original);
-        }
-
-        function updateLightboxInfo() {
-            const imageData = currentImageList[currentIndex];
-            document.getElementById('lightboxTitle').textContent = imageData.name;
-            document.getElementById('counter').textContent = `${currentIndex + 1} / ${currentImageList.length}`;
-            
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.href = getOriginalUrl(imageData.original);
-            downloadBtn.download = imageData.name;
-        }
-
-        function toggleSelectCurrent() {
-            toggleSelect(currentDate, currentIndex);
-        }
-
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.remove('active');
-        }
-
-        function nextImage() {
-            currentIndex = (currentIndex + 1) % currentImageList.length;
-            document.getElementById('loading').style.display = 'flex';
-            document.getElementById('lightboxImg').style.display = 'none';
-            updateLightboxInfo();
-            loadImage();
-        }
-
-        function prevImage() {
-            currentIndex = (currentIndex - 1 + currentImageList.length) % currentImageList.length;
-            document.getElementById('loading').style.display = 'flex';
-            document.getElementById('lightboxImg').style.display = 'none';
-            updateLightboxInfo();
-            loadImage();
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (!document.getElementById('lightbox').classList.contains('active')) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowRight') nextImage();
-            if (e.key === 'ArrowLeft') prevImage();
-        });
-
-        // Upload functionality
-        function openUploadModal() {
-            document.getElementById('uploadModal').classList.add('active');
-        }
-
-        function closeUploadModal() {
-            document.getElementById('uploadModal').classList.remove('active');
-            document.getElementById('uploadInput').value = '';
-            document.getElementById('uploadPreview').innerHTML = '';
-            document.getElementById('uploadStatus').textContent = '';
-        }
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            const preview = document.getElementById('uploadPreview');
-            preview.innerHTML = '';
-            
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const div = document.createElement('div');
-                        div.className = 'upload-preview-item';
-                        div.innerHTML = `
-                            <img src="${e.target.result}" alt="${file.name}">
-                            <span>${file.name}</span>
-                        `;
-                        preview.appendChild(div);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        async function uploadImages() {
-            const files = document.getElementById('uploadInput').files;
-            if (files.length === 0) {
-                document.getElementById('uploadStatus').textContent = '请选择图片';
-                return;
-            }
-
-            const status = document.getElementById('uploadStatus');
-            status.textContent = '上传中...';
-
-            const formData = new FormData();
-            Array.from(files).forEach(file => {
-                formData.append('images', file);
-            });
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    status.textContent = `上传成功: ${result.files.length} 张图片`;
-                    setTimeout(() => {
-                        closeUploadModal();
-                        location.reload();
-                    }, 1500);
-                } else {
-                    status.textContent = '上传失败';
-                }
-            } catch (error) {
-                status.textContent = '上传错误: ' + error.message;
-            }
-        }
-
-        // Cloudinary Upload functionality
-        let cloudinaryFiles = [];
-
-        // Bind event listener after DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            const cloudinaryInput = document.getElementById('cloudinaryInput');
-            if (cloudinaryInput) {
-                cloudinaryInput.addEventListener('change', handleCloudinaryFileSelect);
-            }
-        });
-
-        function openCloudinaryModal() {
-            document.getElementById('cloudinaryModal').classList.add('active');
-        }
-
-        function closeCloudinaryModal() {
-            document.getElementById('cloudinaryModal').classList.remove('active');
-            document.getElementById('cloudinaryInput').value = '';
-            document.getElementById('cloudinaryPreview').innerHTML = '';
-            document.getElementById('cloudinaryStatus').textContent = '';
-            cloudinaryFiles = [];
-        }
-
-        function handleCloudinaryFileSelect(e) {
-            const files = e.target.files;
-            cloudinaryFiles = Array.from(files);
-            const preview = document.getElementById('cloudinaryPreview');
-            preview.innerHTML = '';
-
-            cloudinaryFiles.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const div = document.createElement('div');
-                        div.className = 'upload-preview-item';
-                        div.innerHTML = `
-                            <img src="${e.target.result}" alt="${file.name}">
-                            <span>${file.name}</span>
-                        `;
-                        preview.appendChild(div);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        async function uploadToCloudinary() {
-            if (cloudinaryFiles.length === 0) {
-                document.getElementById('cloudinaryStatus').textContent = '请选择图片';
-                return;
-            }
-
-            const status = document.getElementById('cloudinaryStatus');
-            status.textContent = '正在上传到 Cloudinary...';
-
-            try {
-                // Load config
-                const configResponse = await fetch('config.json');
-                const config = await configResponse.json();
-                const { cloudName, folder } = config.cloudinary;
-
-                if (!cloudName) {
-                    status.textContent = '错误: 请在 config.json 中配置 Cloudinary cloudName';
-                    return;
-                }
-
-                const uploadedUrls = [];
-
-                for (const file of cloudinaryFiles) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    // Use unsigned upload preset (must be configured in Cloudinary dashboard)
-                    formData.append('upload_preset', 'image-gallery-unsigned');
-                    if (folder) {
-                        formData.append('folder', folder);
-                    }
-
-                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        uploadedUrls.push(result.secure_url);
-                    } else {
-                        const error = await response.json();
-                        throw new Error(error.error?.message || '上传失败');
-                    }
-                }
-
-                // Add uploaded images to localStorage and galleryData
-                const today = new Date().toISOString().split('T')[0];
-                const newImages = uploadedUrls.map(url => {
-                    const filename = url.split('/').pop();
-                    return {
-                        name: filename,
-                        original: url,  // Store full Cloudinary URL
-                        date: today
-                    };
-                });
-                
-                // Save to localStorage
-                uploadedImages = newImages.concat(uploadedImages);
-                localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages));
-                
-                // Update galleryData
-                galleryData['最近上传'] = uploadedImages;
-                
-                // Also add to date folder (create if not exists)
-                if (!galleryData[today]) {
-                    galleryData[today] = [];
-                }
-                galleryData[today] = newImages.concat(galleryData[today]);
-                
-                // Refresh gallery display
-                refreshGallery();
-
-                // Display URLs with copy buttons
-                const urlListHtml = uploadedUrls.map((url, index) => `
-                    <div style="margin: 8px 0; word-break: break-all;">
-                        <a href="${url}" target="_blank">${url}</a>
-                        <button onclick="navigator.clipboard.writeText('${url}').then(() => alert('已复制'))" style="margin-left: 8px; padding: 4px 8px; font-size: 12px;">复制</button>
-                    </div>
-                `).join('');
-
-                status.innerHTML = `<div style="text-align: left;"><strong>上传成功! 已添加到"最近上传"</strong><br>${urlListHtml}</div>`;
-            } catch (error) {
-                status.textContent = '上传错误: ' + error.message;
-                console.error('Cloudinary upload error:', error);
-            }
-        }
-
-        function refreshGallery() {
-            // Clear and re-render gallery
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            sidebar.innerHTML = '';
-            mainContent.innerHTML = '';
-            initGallery();
-        }
-
-        // Only init gallery if password verified or already authenticated
-        async function initGalleryWithAPI() {
-            await fetchImages();
-            initGallery();
-        }
-        
-        if (window.galleryReady || sessionStorage.getItem('galleryAuth') === 'true') {
-            initGalleryWithAPI();
-        } else {
-            window.initGalleryPending = true;
-            window.initGalleryWithAPI = initGalleryWithAPI;
-        }
     </script>
-
-    <!-- Cloudinary Upload Modal -->
-    <div class="modal" id="cloudinaryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>上传到 Cloudinary</h3>
-                <button class="modal-close" onclick="closeCloudinaryModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="file" id="cloudinaryInput" multiple accept="image/*" style="display: none;">
-                <button class="upload-select-btn" onclick="document.getElementById('cloudinaryInput').click()">
-                    选择图片
-                </button>
-                <div class="upload-preview" id="cloudinaryPreview"></div>
-                <div class="upload-status" id="cloudinaryStatus"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" onclick="closeCloudinaryModal()">取消</button>
-                <button class="modal-btn primary" onclick="uploadToCloudinary()">上传</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
