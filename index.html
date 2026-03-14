@@ -55,6 +55,14 @@
         .global-toast.error { background: rgba(255,59,48,0.95); }
         .global-toast .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        /* 多任务提示容器 */
+        .toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 500; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast-item { background: rgba(0,122,255,0.95); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); opacity: 0; transform: translateY(-20px); animation: toastSlideIn 0.3s ease forwards; pointer-events: auto; min-width: 200px; }
+        .toast-item.success { background: rgba(52,199,89,0.95); }
+        .toast-item.error { background: rgba(255,59,48,0.95); }
+        .toast-item .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes toastSlideIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastSlideOut { to { opacity: 0; transform: translateY(-20px); } }
         .image-card img { width: 100%; height: 100%; object-fit: cover; }
         .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
@@ -96,11 +104,8 @@
         <button class="header-btn" onclick="clearSelection()">取消</button>
     </div>
 
-    <!-- 全局任务提示条 -->
-    <div class="global-toast" id="globalToast">
-        <span class="spinner" id="toastSpinner"></span>
-        <span id="toastMessage">正在处理...</span>
-    </div>
+    <!-- 多任务提示容器 -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <button class="upload-btn" onclick="openUpload()">+</button>
 
@@ -302,14 +307,14 @@
             const count = selectedImages.size;
             if (!confirm('确定删除选中的 ' + count + ' 张图片？')) return;
             
-            // 显示全局提示，后台删除
-            showToast(`正在删除 ${count} 张图片...`, 'loading');
+            // 创建独立任务提示
+            const toastId = showToast(`正在删除 ${count} 张图片...`, 'loading');
             
             // 后台执行删除
-            batchDeleteInBackground(Array.from(selectedImages));
+            batchDeleteInBackground(Array.from(selectedImages), toastId);
         }
         
-        async function batchDeleteInBackground(keys) {
+        async function batchDeleteInBackground(keys, toastId) {
             let deleted = 0;
             let failed = 0;
             
@@ -338,15 +343,18 @@
                 }
                 
                 // 更新提示
-                showToast(`删除中... ${deleted + failed}/${keys.length}`, 'loading');
+                updateToast(toastId, `删除中... ${deleted + failed}/${keys.length}`, 'loading');
             }
             
             // 完成提示
             if (failed === 0) {
-                showToast(`✓ 已删除 ${deleted} 张图片`, 'success', 3000);
+                updateToast(toastId, `✓ 已删除 ${deleted} 张图片`, 'success');
             } else {
-                showToast(`删除完成：${deleted} 成功, ${failed} 失败`, 'error', 3000);
+                updateToast(toastId, `删除完成：${deleted} 成功, ${failed} 失败`, 'error');
             }
+            
+            // 3秒后移除提示
+            setTimeout(() => removeToast(toastId), 3000);
             
             clearSelection();
             setTimeout(() => initGallery(), 1000);
@@ -456,9 +464,9 @@
             
             if (!confirm('确定要删除这张图片吗？')) return;
             
-            // 关闭大图，显示全局提示
+            // 关闭大图，创建独立任务提示
             closeLightbox();
-            showToast('正在删除图片...', 'loading');
+            const toastId = showToast('正在删除图片...', 'loading');
             
             try {
                 const response = await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), {
@@ -466,15 +474,18 @@
                 });
                 
                 if (response.ok) {
-                    showToast('✓ 图片已删除', 'success', 3000);
-                    setTimeout(() => initGallery(), 1000);
+                    updateToast(toastId, '✓ 图片已删除', 'success');
                 } else {
-                    showToast('删除失败', 'error', 3000);
+                    updateToast(toastId, '删除失败', 'error');
                 }
             } catch (e) {
                 console.error('删除错误:', e);
-                showToast('删除错误: ' + e.message, 'error', 3000);
+                updateToast(toastId, '删除错误: ' + e.message, 'error');
             }
+            
+            // 3秒后移除提示
+            setTimeout(() => removeToast(toastId), 3000);
+            setTimeout(() => initGallery(), 1000);
         }
 
         function openUpload() {
@@ -665,34 +676,54 @@
             }
         }
 
-        // 全局提示函数
+        // 多任务提示系统
+        let toastIdCounter = 0;
+        const activeToasts = new Map();
+        
         function showToast(message, type = 'loading', duration = 0) {
-            const toast = document.getElementById('globalToast');
-            const msgEl = document.getElementById('toastMessage');
-            const spinner = document.getElementById('toastSpinner');
+            const container = document.getElementById('toastContainer');
+            const id = 'toast-' + (++toastIdCounter);
             
-            msgEl.textContent = message;
-            toast.className = 'global-toast show';
+            const toast = document.createElement('div');
+            toast.id = id;
+            toast.className = 'toast-item';
+            if (type === 'success') toast.classList.add('success');
+            if (type === 'error') toast.classList.add('error');
             
-            if (type === 'loading') {
-                spinner.style.display = 'inline-block';
-                toast.classList.remove('success', 'error');
-            } else if (type === 'success') {
-                spinner.style.display = 'none';
-                toast.classList.add('success');
-            } else if (type === 'error') {
-                spinner.style.display = 'none';
-                toast.classList.add('error');
-            }
+            const spinner = type === 'loading' ? '<span class="spinner"></span>' : '';
+            toast.innerHTML = spinner + '<span>' + message + '</span>';
+            
+            container.appendChild(toast);
+            activeToasts.set(id, toast);
             
             if (duration > 0) {
-                setTimeout(() => hideToast(), duration);
+                setTimeout(() => removeToast(id), duration);
             }
+            
+            return id;
         }
         
-        function hideToast() {
-            const toast = document.getElementById('globalToast');
-            toast.classList.remove('show');
+        function updateToast(id, message, type) {
+            const toast = activeToasts.get(id);
+            if (!toast) return;
+            
+            toast.className = 'toast-item';
+            if (type === 'success') toast.classList.add('success');
+            if (type === 'error') toast.classList.add('error');
+            
+            const spinner = type === 'loading' ? '<span class="spinner"></span>' : '';
+            toast.innerHTML = spinner + '<span>' + message + '</span>';
+        }
+        
+        function removeToast(id) {
+            const toast = activeToasts.get(id);
+            if (!toast) return;
+            
+            toast.style.animation = 'toastSlideOut 0.3s ease forwards';
+            setTimeout(() => {
+                toast.remove();
+                activeToasts.delete(id);
+            }, 300);
         }
 
         async function uploadFiles() {
@@ -703,15 +734,15 @@
 
             const fileCount = selectedFiles.length;
             
-            // 关闭上传弹窗，显示全局提示
+            // 关闭上传弹窗，创建独立任务提示
             closeUpload();
-            showToast(`正在上传 ${fileCount} 张图片...`, 'loading');
+            const toastId = showToast(`正在上传 ${fileCount} 张图片...`, 'loading');
             
             // 在后台执行上传
-            uploadFilesInBackground(selectedFiles);
+            uploadFilesInBackground(selectedFiles, toastId);
         }
         
-        async function uploadFilesInBackground(files) {
+        async function uploadFilesInBackground(files, toastId) {
             let uploaded = 0;
             let failed = 0;
             const MAX_SIZE_MB = 10;
@@ -753,15 +784,18 @@
                 }
                 
                 // 更新提示
-                showToast(`上传中... ${uploaded + failed}/${files.length}`, 'loading');
+                updateToast(toastId, `上传中... ${uploaded + failed}/${files.length}`, 'loading');
             }
 
             // 完成提示
             if (failed === 0) {
-                showToast(`✓ 上传完成！${uploaded} 张图片`, 'success', 3000);
+                updateToast(toastId, `✓ 上传完成！${uploaded} 张图片`, 'success');
             } else {
-                showToast(`上传完成：${uploaded} 成功, ${failed} 失败`, 'error', 3000);
+                updateToast(toastId, `上传完成：${uploaded} 成功, ${failed} 失败`, 'error');
             }
+            
+            // 3秒后移除提示
+            setTimeout(() => removeToast(toastId), 3000);
             
             // 刷新画廊
             setTimeout(() => initGallery(), 1000);
