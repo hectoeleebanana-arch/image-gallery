@@ -48,6 +48,13 @@
         .lightbox-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .lightbox-img { max-width: 90%; max-height: 80vh; object-fit: contain; }
         .lightbox-footer { height: 60px; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        /* 全局任务提示条 */
+        .global-toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,122,255,0.95); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 500; opacity: 0; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .global-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .global-toast.success { background: rgba(52,199,89,0.95); }
+        .global-toast.error { background: rgba(255,59,48,0.95); }
+        .global-toast .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .image-card img { width: 100%; height: 100%; object-fit: cover; }
         .loading { display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); padding: 40px; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
@@ -87,6 +94,12 @@
         <button class="header-btn" onclick="batchDownload()">下载</button>
         <button class="header-btn" onclick="batchDelete()">删除</button>
         <button class="header-btn" onclick="clearSelection()">取消</button>
+    </div>
+
+    <!-- 全局任务提示条 -->
+    <div class="global-toast" id="globalToast">
+        <span class="spinner" id="toastSpinner"></span>
+        <span id="toastMessage">正在处理...</span>
     </div>
 
     <button class="upload-btn" onclick="openUpload()">+</button>
@@ -286,27 +299,57 @@
         }
 
         async function batchDelete() {
-            if (!confirm('确定删除选中的 ' + selectedImages.size + ' 张图片？')) return;
+            const count = selectedImages.size;
+            if (!confirm('确定删除选中的 ' + count + ' 张图片？')) return;
             
+            // 显示全局提示，后台删除
+            showToast(`正在删除 ${count} 张图片...`, 'loading');
+            
+            // 后台执行删除
+            batchDeleteInBackground(Array.from(selectedImages));
+        }
+        
+        async function batchDeleteInBackground(keys) {
             let deleted = 0;
-            for (const key of Array.from(selectedImages)) {
+            let failed = 0;
+            
+            for (const key of keys) {
                 const parts = key.split('/');
-                const img = galleryData[parts[0]][parts[1]];
+                const date = parts[0];
+                const index = parts[1];
+                const img = galleryData[date] && galleryData[date][index];
+                
                 if (img && img.public_id) {
                     try {
                         const response = await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), { 
                             method: 'DELETE' 
                         });
-                        if (response.ok) deleted++;
+                        if (response.ok) {
+                            deleted++;
+                        } else {
+                            failed++;
+                        }
                     } catch (e) {
                         console.error('删除失败:', e);
+                        failed++;
                     }
+                } else {
+                    failed++;
                 }
+                
+                // 更新提示
+                showToast(`删除中... ${deleted + failed}/${keys.length}`, 'loading');
             }
             
-            alert('已删除 ' + deleted + ' 张图片');
+            // 完成提示
+            if (failed === 0) {
+                showToast(`✓ 已删除 ${deleted} 张图片`, 'success', 3000);
+            } else {
+                showToast(`删除完成：${deleted} 成功, ${failed} 失败`, 'error', 3000);
+            }
+            
             clearSelection();
-            initGallery();
+            setTimeout(() => initGallery(), 1000);
         }
 
         async function downloadImage(url, filename) {
@@ -413,21 +456,24 @@
             
             if (!confirm('确定要删除这张图片吗？')) return;
             
+            // 关闭大图，显示全局提示
+            closeLightbox();
+            showToast('正在删除图片...', 'loading');
+            
             try {
                 const response = await fetch(API_BASE_URL + '/images/' + encodeURIComponent(img.public_id), {
                     method: 'DELETE'
                 });
                 
                 if (response.ok) {
-                    // 删除成功，关闭大图并刷新
-                    closeLightbox();
-                    initGallery();
+                    showToast('✓ 图片已删除', 'success', 3000);
+                    setTimeout(() => initGallery(), 1000);
                 } else {
-                    alert('删除失败');
+                    showToast('删除失败', 'error', 3000);
                 }
             } catch (e) {
                 console.error('删除错误:', e);
-                alert('删除错误: ' + e.message);
+                showToast('删除错误: ' + e.message, 'error', 3000);
             }
         }
 
@@ -520,6 +566,49 @@
             });
         }
 
+        // 快速压缩 - 直接降低质量，不循环尝试
+        async function compressImageFast(file, maxSizeMB) {
+            return new Promise(function(resolve, reject) {
+                if (file.size <= maxSizeMB * 1024 * 1024) {
+                    resolve(file);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 保持原始尺寸
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // 根据文件大小估算质量
+                        const ratio = (maxSizeMB * 1024 * 1024) / file.size;
+                        const quality = Math.max(0.5, Math.min(0.85, ratio * 0.8));
+                        
+                        canvas.toBlob(function(blob) {
+                            if (!blob) {
+                                reject(new Error('压缩失败'));
+                                return;
+                            }
+                            
+                            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, 'image/jpeg', quality);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         // 检查存储空间并自动清理
         async function checkAndCleanupStorage() {
             const status = document.getElementById('uploadStatus');
@@ -576,39 +665,66 @@
             }
         }
 
+        // 全局提示函数
+        function showToast(message, type = 'loading', duration = 0) {
+            const toast = document.getElementById('globalToast');
+            const msgEl = document.getElementById('toastMessage');
+            const spinner = document.getElementById('toastSpinner');
+            
+            msgEl.textContent = message;
+            toast.className = 'global-toast show';
+            
+            if (type === 'loading') {
+                spinner.style.display = 'inline-block';
+                toast.classList.remove('success', 'error');
+            } else if (type === 'success') {
+                spinner.style.display = 'none';
+                toast.classList.add('success');
+            } else if (type === 'error') {
+                spinner.style.display = 'none';
+                toast.classList.add('error');
+            }
+            
+            if (duration > 0) {
+                setTimeout(() => hideToast(), duration);
+            }
+        }
+        
+        function hideToast() {
+            const toast = document.getElementById('globalToast');
+            toast.classList.remove('show');
+        }
+
         async function uploadFiles() {
             if (selectedFiles.length === 0) {
                 alert('请先选择图片');
                 return;
             }
 
-            const status = document.getElementById('uploadStatus');
+            const fileCount = selectedFiles.length;
             
-            // 1. 检查存储并自动清理
-            const canUpload = await checkAndCleanupStorage();
-            if (!canUpload) {
-                status.textContent = '存储空间不足且清理失败，无法上传';
-                return;
-            }
+            // 关闭上传弹窗，显示全局提示
+            closeUpload();
+            showToast(`正在上传 ${fileCount} 张图片...`, 'loading');
             
-            status.textContent = '准备上传 (0/' + selectedFiles.length + ')';
-
+            // 在后台执行上传
+            uploadFilesInBackground(selectedFiles);
+        }
+        
+        async function uploadFilesInBackground(files) {
             let uploaded = 0;
             let failed = 0;
+            const MAX_SIZE_MB = 10;
             const CLOUDINARY_CLOUD = 'dkwyvhifz';
             const FOLDER = 'image-gallery';
-            const MAX_SIZE_MB = 10;
 
-            for (let i = 0; i < selectedFiles.length; i++) {
-                status.textContent = '处理中 (' + (i + 1) + '/' + selectedFiles.length + ')';
-                
-                let file = selectedFiles[i];
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
                 
                 // 压缩大于 10MB 的图片
                 if (file.size > MAX_SIZE_MB * 1024 * 1024) {
                     try {
-                        status.textContent = '压缩中 (' + (i + 1) + '/' + selectedFiles.length + ')';
-                        file = await compressImage(file, MAX_SIZE_MB);
+                        file = await compressImageFast(file, MAX_SIZE_MB);
                     } catch (e) {
                         console.error('压缩失败:', e);
                         failed++;
@@ -630,24 +746,25 @@
                     if (response.ok) {
                         uploaded++;
                     } else {
-                        const error = await response.text();
-                        console.error('上传失败:', error);
                         failed++;
                     }
                 } catch (e) {
                     failed++;
-                    console.error('上传错误:', e);
                 }
-
-                status.textContent = '上传中 (' + (i + 1) + '/' + selectedFiles.length + ')';
+                
+                // 更新提示
+                showToast(`上传中... ${uploaded + failed}/${files.length}`, 'loading');
             }
 
-            status.textContent = '上传完成: ' + uploaded + ' 成功' + (failed > 0 ? ', ' + failed + ' 失败' : '');
+            // 完成提示
+            if (failed === 0) {
+                showToast(`✓ 上传完成！${uploaded} 张图片`, 'success', 3000);
+            } else {
+                showToast(`上传完成：${uploaded} 成功, ${failed} 失败`, 'error', 3000);
+            }
             
-            setTimeout(function() {
-                closeUpload();
-                initGallery();
-            }, 1500);
+            // 刷新画廊
+            setTimeout(() => initGallery(), 1000);
         }
 
         if (sessionStorage.getItem('galleryAuth') === 'true') {
